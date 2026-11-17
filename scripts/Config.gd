@@ -23,6 +23,15 @@ const CELL_RADIUS: int = 7
 const PANEL_PADDING: int = 12
 const BOARD_PANEL_ORIGIN: Vector2 = Vector2(22, 217.5)
 
+const TRAY_CARD_SIZE: int = 136
+const TRAY_CARD_RADIUS: int = 20
+const TRAY_Y: float = 681.5
+const TRAY_CARD_X: Array[int] = [22, 172, 322]
+const TRAY_CELL: int = 30
+const TRAY_GAP: int = 3
+const TRAY_CELL_RADIUS: int = 5
+const TRAY_SLOTS: int = 3
+
 static func color_for(id: int) -> Color:
 	match id:
 		1:

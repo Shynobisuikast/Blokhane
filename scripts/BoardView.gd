@@ -2,6 +2,8 @@
 class_name BoardView
 extends Control
 
+const CellDrawingScript = preload("res://scripts/CellDrawing.gd")
+
 var model: BoardModel
 var _panel_style: StyleBoxFlat
 var _empty_style: StyleBoxFlat
@@ -59,7 +61,7 @@ func _draw() -> void:
 				_draw_empty_cell_shadow(cell_rect)
 			else:
 				draw_style_box(_style_for_color(color_id), cell_rect)
-				_draw_filled_cell_bevel(cell_rect)
+				CellDrawingScript.draw_filled_cell_bevel(self, cell_rect, Config.CELL_RADIUS)
 
 func _grid_origin() -> Vector2:
 	return Config.BOARD_PANEL_ORIGIN + Vector2(Config.PANEL_PADDING, Config.PANEL_PADDING)
@@ -96,21 +98,4 @@ func _draw_empty_cell_shadow(rect: Rect2) -> void:
 		Vector2(rect.end.x - inset, y),
 		Color(0.0, 0.0, 0.0, 0.22),
 		2.0
-	)
-
-func _draw_filled_cell_bevel(rect: Rect2) -> void:
-	var inset: float = Config.CELL_RADIUS
-	var left: float = rect.position.x + inset
-	var right: float = rect.end.x - inset
-	draw_line(
-		Vector2(left, rect.position.y + 1.5),
-		Vector2(right, rect.position.y + 1.5),
-		Color(1.0, 1.0, 1.0, 0.38),
-		3.0
-	)
-	draw_line(
-		Vector2(left, rect.end.y - 1.5),
-		Vector2(right, rect.end.y - 1.5),
-		Color(0.0, 0.0, 0.0, 0.30),
-		3.0
 	)
