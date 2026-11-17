@@ -1,4 +1,4 @@
-# AGENT.md - Blok Bulmacası (Godot 4 / GDScript)
+# AGENT.md - Blokhane (Godot 4 / GDScript)
 
 Bu dosya hem proje talimatıdır hem de her fazda uyulacak kalite kurallarıdır.
 Her oturumun başında bu dosyayı ve PLAN.md'yi oku. AKTİF fazı PLAN.md'den bul.
@@ -21,6 +21,7 @@ Tür: sürükle-bırak blok bulmacası. Tetris DEĞİL: parça düşmez, döndü
 - Tepsideki hiçbir parça tahtaya sığmıyorsa oyun biter.
 - Üstte duraklat düğmesi, skor ve en yüksek skor bulunur.
 - Çelişki olursa tasarım SVG'leri kazanır. Çelişkiyi bildir, varsayma.
+- Tasarım dosyaları res://templates/ altında; ölçü ve renk için oraya bak, tahmin etme.
 
 ## 3. Teknik kurallar
 
@@ -82,7 +83,7 @@ Doğrulama için GUT gibi eklenti kurma. Bunun yerine `BoardModel` için `tests/
 
 ### Faz 2 - Tahta çizimi
 
-- BoardView modeli çizer, modeli değiştirmez. Hücre 48 px, boşluk 4 px, köşe yuvarlak (rx 12 gibi), tasarımdaki iç gölge hissi.
+- BoardView modeli çizer, modeli değiştirmez. Hücre 48 px, boşluk 4 px, hücre yarıçapı 7, panel yarıçapı 22, tasarımdaki iç gölge hissi.
 - Boş hücre #22407F, dolu hücre parçanın rengi.
 
 ### Faz 3 - Parça seti ve tepsi

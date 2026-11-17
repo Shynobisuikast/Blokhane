@@ -17,3 +17,23 @@ const RED: Color = Color("#E8553E")
 const GREEN: Color = Color("#3FA66B")
 const TEXT: Color = Color("#F2EEE4")
 const TEXT_SECONDARY: Color = Color("#9FB0D4")
+
+const PANEL_RADIUS: int = 22
+const CELL_RADIUS: int = 7
+const PANEL_PADDING: int = 12
+const BOARD_PANEL_ORIGIN: Vector2 = Vector2(22, 217.5)
+
+static func color_for(id: int) -> Color:
+	match id:
+		1:
+			return BLUE
+		2:
+			return TEAL
+		3:
+			return YELLOW
+		4:
+			return RED
+		5:
+			return GREEN
+		_:
+			return CELL_EMPTY
