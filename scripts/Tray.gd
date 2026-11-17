@@ -3,6 +3,7 @@ class_name Tray
 extends Control
 
 var pieces: Array = []
+var _hidden_slots: Array[bool] = []
 var _panel_style: StyleBoxFlat
 var _piece_styles: Dictionary = {}
 
@@ -11,7 +12,9 @@ func _init() -> void:
 
 func set_pieces(p: Array) -> void:
 	pieces.clear()
+	_hidden_slots.clear()
 	for slot: int in range(Config.TRAY_SLOTS):
+		_hidden_slots.append(false)
 		if slot < p.size() and p[slot] is Dictionary:
 			pieces.append((p[slot] as Dictionary).duplicate(true))
 		else:
@@ -22,7 +25,20 @@ func remove_piece(slot: int) -> void:
 	if slot < 0 or slot >= pieces.size():
 		return
 	pieces[slot] = null
+	_hidden_slots[slot] = false
 	queue_redraw()
+
+func set_slot_hidden(slot: int, should_hide: bool) -> void:
+	if slot < 0 or slot >= _hidden_slots.size() or _hidden_slots[slot] == should_hide:
+		return
+	_hidden_slots[slot] = should_hide
+	queue_redraw()
+
+func slot_at(pos: Vector2) -> int:
+	for slot: int in range(Config.TRAY_SLOTS):
+		if slot_rect(slot).has_point(pos):
+			return slot
+	return -1
 
 func slot_rect(slot: int) -> Rect2:
 	if slot < 0 or slot >= Config.TRAY_SLOTS:
@@ -47,7 +63,7 @@ func piece_cell_origin(slot: int) -> Vector2:
 func _draw() -> void:
 	for slot: int in range(Config.TRAY_SLOTS):
 		draw_style_box(_panel_style, slot_rect(slot))
-		if slot < pieces.size() and pieces[slot] != null:
+		if slot < pieces.size() and pieces[slot] != null and not _hidden_slots[slot]:
 			_draw_piece(slot, pieces[slot] as Dictionary)
 
 func _draw_piece(slot: int, piece: Dictionary) -> void:

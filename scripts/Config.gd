@@ -31,6 +31,8 @@ const TRAY_CELL: int = 30
 const TRAY_GAP: int = 3
 const TRAY_CELL_RADIUS: int = 5
 const TRAY_SLOTS: int = 3
+const DRAG_OFFSET_Y: int = 0
+const RETURN_TWEEN_TIME: float = 0.15
 
 static func color_for(id: int) -> Color:
 	match id:

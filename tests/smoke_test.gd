@@ -5,6 +5,7 @@ const BoardModelScript = preload("res://scripts/BoardModel.gd")
 const PiecesScript = preload("res://scripts/Pieces.gd")
 const PieceGeneratorScript = preload("res://scripts/PieceGenerator.gd")
 const TrayScript = preload("res://scripts/Tray.gd")
+const DragMathTestRunnerScript = preload("res://tests/DragMathTestRunner.gd")
 
 var _checks_total: int = 0
 var _checks_passed: int = 0
@@ -110,6 +111,7 @@ func _run_tests() -> void:
 	check("Panel dışındaki nokta hücre değildir", board_view.local_to_cell(Vector2.ZERO) == Vector2i(-1, -1))
 	board_view.free()
 	_run_piece_tests()
+	DragMathTestRunnerScript.run(self)
 
 func check(test_name: String, condition: bool) -> void:
 	_checks_total += 1
@@ -163,7 +165,6 @@ func _run_piece_tests() -> void:
 	tray.set_pieces([_find_piece(catalog, "v2"), _find_piece(catalog, "l"), _find_piece(catalog, "sq2")])
 	check("Tepsi parçaları tasarım konumlarında ortalanır", tray.piece_cell_origin(0) == Vector2(75, 718) and tray.piece_cell_origin(1) == Vector2(208.5, 701.5) and tray.piece_cell_origin(2) == Vector2(358.5, 718))
 	tray.free()
-
 func _catalog_state(catalog: Array[Dictionary]) -> Dictionary:
 	var normalized: bool = true
 	var fits: bool = true
@@ -187,7 +188,6 @@ func _fairness_holds(generator: Variant, rng: RandomNumberGenerator) -> bool:
 			if _board.can_fit_anywhere(piece["shape"]): has_fitting_piece = true; break
 		if not has_fitting_piece: return false
 	return true
-
 func _fill_board_except(empty_cells: Array[Vector2i]) -> void:
 	_board.reset()
 	for index: int in range(Config.BOARD_SIZE * Config.BOARD_SIZE):
