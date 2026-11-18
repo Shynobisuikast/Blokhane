@@ -7,17 +7,57 @@ const CellDrawingScript = preload("res://scripts/CellDrawing.gd")
 var model: BoardModel
 var _panel_style: StyleBoxFlat
 var _empty_style: StyleBoxFlat
+var _highlight_style: StyleBoxFlat
+var _ghost_shadow_style: StyleBoxFlat
 var _filled_styles: Dictionary = {}
+var _ghost_styles: Dictionary = {}
+var _preview_cells: Array[Vector2i] = []
+var _preview_color_id: int = 0
+var _preview_rows: Array[int] = []
+var _preview_columns: Array[int] = []
 
 func _init() -> void:
 	_panel_style = _make_style_box(Config.PANEL, Config.PANEL_RADIUS)
 	_empty_style = _make_style_box(Config.CELL_EMPTY, Config.CELL_RADIUS)
+	_highlight_style = _make_style_box(Config.LINE_HIGHLIGHT, Config.CELL_RADIUS)
+	_ghost_shadow_style = _make_style_box(
+		Color(0.0, 0.0, 0.0, Config.GHOST_SHADOW_ALPHA),
+		Config.CELL_RADIUS
+	)
 
 func set_model(m: BoardModel) -> void:
 	model = m
 	refresh()
 
 func refresh() -> void:
+	queue_redraw()
+
+func set_preview(cells: Array[Vector2i], color_id: int, rows: Array[int], cols: Array[int]) -> void:
+	if (
+		_preview_cells == cells
+		and _preview_color_id == color_id
+		and _preview_rows == rows
+		and _preview_columns == cols
+	):
+		return
+	_preview_cells = cells.duplicate()
+	_preview_color_id = color_id
+	_preview_rows = rows.duplicate()
+	_preview_columns = cols.duplicate()
+	queue_redraw()
+
+func clear_preview() -> void:
+	if (
+		_preview_cells.is_empty()
+		and _preview_color_id == 0
+		and _preview_rows.is_empty()
+		and _preview_columns.is_empty()
+	):
+		return
+	_preview_cells.clear()
+	_preview_color_id = 0
+	_preview_rows.clear()
+	_preview_columns.clear()
 	queue_redraw()
 
 func cell_to_local(cell: Vector2i) -> Vector2:
@@ -62,6 +102,38 @@ func _draw() -> void:
 			else:
 				draw_style_box(_style_for_color(color_id), cell_rect)
 				CellDrawingScript.draw_filled_cell_bevel(self, cell_rect, Config.CELL_RADIUS)
+
+	for cell: Vector2i in _preview_cells:
+		var shadow_rect: Rect2 = Rect2(
+			cell_to_local(cell) + Vector2(0.0, Config.GHOST_SHADOW_OFFSET_Y),
+			Vector2(Config.CELL_SIZE, Config.CELL_SIZE)
+		)
+		draw_style_box(_ghost_shadow_style, shadow_rect)
+
+	if not _preview_cells.is_empty():
+		var ghost_style: StyleBoxFlat = _style_for_ghost_color(_preview_color_id)
+		for cell: Vector2i in _preview_cells:
+			var ghost_rect: Rect2 = Rect2(
+				cell_to_local(cell),
+				Vector2(Config.CELL_SIZE, Config.CELL_SIZE)
+			)
+			draw_style_box(ghost_style, ghost_rect)
+
+	for row: int in range(Config.BOARD_SIZE):
+		for column: int in range(Config.BOARD_SIZE):
+			if _preview_rows.has(row) or _preview_columns.has(column):
+				var highlight_rect: Rect2 = Rect2(
+					cell_to_local(Vector2i(column, row)),
+					Vector2(Config.CELL_SIZE, Config.CELL_SIZE)
+				)
+				draw_style_box(_highlight_style, highlight_rect)
+
+func _style_for_ghost_color(color_id: int) -> StyleBoxFlat:
+	if not _ghost_styles.has(color_id):
+		var ghost_color: Color = Config.color_for(color_id)
+		ghost_color.a = Config.GHOST_ALPHA
+		_ghost_styles[color_id] = _make_style_box(ghost_color, Config.CELL_RADIUS)
+	return _ghost_styles[color_id] as StyleBoxFlat
 
 func _grid_origin() -> Vector2:
 	return Config.BOARD_PANEL_ORIGIN + Vector2(Config.PANEL_PADDING, Config.PANEL_PADDING)

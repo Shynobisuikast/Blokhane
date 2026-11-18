@@ -20,6 +20,10 @@ const TEXT_SECONDARY: Color = Color("#9FB0D4")
 
 const PANEL_RADIUS: int = 22
 const CELL_RADIUS: int = 7
+const GHOST_ALPHA: float = 0.40
+const GHOST_SHADOW_ALPHA: float = 0.30
+const GHOST_SHADOW_OFFSET_Y: float = 3.0
+const LINE_HIGHLIGHT: Color = Color(1.0, 1.0, 1.0, 0.18)
 const PANEL_PADDING: int = 12
 const BOARD_PANEL_ORIGIN: Vector2 = Vector2(22, 217.5)
 

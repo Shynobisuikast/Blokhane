@@ -18,7 +18,7 @@ Bütçe: 5 USD GPT kredisi. Her fazda harcanan krediyi kaydet.
 - [x] Faz 2 - Tahta çizimi. Kabul: 8x8 ızgara tasarıma benziyor.
 - [x] Faz 3 - Parça seti ve tepsi. Kabul: alt tepside 3 parça görünüyor.
 - [x] Faz 4 - Sürükle-bırak. Kabul: parça tahtaya yerleşiyor, geçersizse geri dönüyor.
-- [ ] Faz 5 - Önizleme. Kabul: sürüklerken kesikli sarı önizleme çıkıyor.
+- [x] Faz 5 - Önizleme. Kabul: sürüklerken parça renginde gölge iz ve çizgi vurgusu görünür.
 - [ ] Faz 6 - Temizleme ve skor. Kabul: satır/sütun siliniyor, skor artıyor.
 - [ ] Faz 7 - Oyun sonu + en yüksek skor. Kabul: oyun bitiyor, skor kaydediliyor.
 - [ ] Faz 8 - Ana menü ve duraklat.
@@ -36,7 +36,8 @@ Online skor tablosu, reklam, satın alma, çok oyunculu, mağaza yayını ayarla
 - Faz 2 bitti. Harcanan: __ USD
 - Faz 3 bitti. Harcanan: __ USD
 - Faz 4 bitti. Harcanan: __ USD
-- Faz 4 bitti. Harcanan: __ USD
+- Faz 5 bitti. Harcanan: __ USD
+- Faz 5 revizyon: kesikli önizleme gölge ize çevrildi. Harcanan: __ USD
 
 ## Bütçe
 

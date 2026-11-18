@@ -16,6 +16,8 @@ var _drag_layer: DragLayer
 var _dragged_piece: Dictionary = {}
 var _dragged_slot: int = -1
 var _drag_state: int = DragState.IDLE
+var _preview_origin: Vector2i = Vector2i.ZERO
+var _has_preview_origin: bool = false
 
 func _ready() -> void:
 	Input.emulate_mouse_from_touch = true
@@ -59,6 +61,7 @@ func _begin_drag(pointer: Vector2) -> void:
 	_dragged_slot = slot
 	_dragged_piece = (_tray.pieces[slot] as Dictionary).duplicate(true)
 	_drag_state = DragState.DRAGGING
+	_has_preview_origin = false
 	_tray.set_slot_hidden(slot, true)
 	_drag_layer.show_piece(_dragged_piece, Vector2.ZERO)
 	_move_drag(pointer)
@@ -69,6 +72,24 @@ func _move_drag(pointer: Vector2) -> void:
 	var layer_pointer: Vector2 = _convert_position(self, _drag_layer, pointer)
 	var shape: Array[Vector2i] = _dragged_piece["shape"]
 	_drag_layer.set_top_left(DragMath.piece_top_left(layer_pointer, shape))
+	var board_top_left: Vector2 = _convert_position(_drag_layer, _board_view, _drag_layer.top_left)
+	var target_origin: Vector2i = DragMath.snap_origin(board_top_left, _board_view)
+	if _has_preview_origin and target_origin == _preview_origin:
+		return
+	_preview_origin = target_origin
+	_has_preview_origin = true
+	if not _board_model.can_place(shape, target_origin):
+		_board_view.clear_preview()
+		return
+
+	var preview_cells: Array[Vector2i] = []
+	for offset: Vector2i in shape:
+		preview_cells.append(target_origin + offset)
+	var complete_lines: Dictionary = _board_model.preview_complete_lines(shape, target_origin)
+	var color_id: int = _dragged_piece["color_id"]
+	var rows: Array[int] = complete_lines["rows"]
+	var columns: Array[int] = complete_lines["cols"]
+	_board_view.set_preview(preview_cells, color_id, rows, columns)
 
 func _drop_piece(pointer: Vector2) -> void:
 	_move_drag(pointer)
@@ -91,6 +112,7 @@ func _drop_piece(pointer: Vector2) -> void:
 func _begin_return() -> void:
 	if _drag_state != DragState.DRAGGING:
 		return
+	_board_view.clear_preview()
 	_drag_state = DragState.RETURNING
 	var target: Vector2 = _convert_position(_tray, _drag_layer, _tray.piece_cell_origin(_dragged_slot))
 	var tween: Tween = create_tween().set_parallel(true)
@@ -108,6 +130,8 @@ func _finish_return(slot: int) -> void:
 	_clear_drag_state()
 
 func _clear_drag_state() -> void:
+	_board_view.clear_preview()
+	_has_preview_origin = false
 	_drag_state = DragState.IDLE
 	_dragged_slot = -1
 	_dragged_piece.clear()

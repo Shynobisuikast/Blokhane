@@ -80,3 +80,36 @@ func can_fit_anywhere(shape: Array[Vector2i]) -> bool:
 			if can_place(shape, Vector2i(column_index, row_index)):
 				return true
 	return false
+
+func preview_complete_lines(shape: Array[Vector2i], origin: Vector2i) -> Dictionary:
+	var empty_result: Dictionary = {"rows": [], "cols": []}
+	if not can_place(shape, origin):
+		return empty_result
+
+	var placed_cells: Dictionary = {}
+	for offset: Vector2i in shape:
+		placed_cells[origin + offset] = true
+
+	var complete_rows: Array[int] = []
+	var complete_columns: Array[int] = []
+	for row_index: int in range(Config.BOARD_SIZE):
+		var row_is_complete: bool = true
+		for column_index: int in range(Config.BOARD_SIZE):
+			var cell: Vector2i = Vector2i(column_index, row_index)
+			if _cells[row_index][column_index] == 0 and not placed_cells.has(cell):
+				row_is_complete = false
+				break
+		if row_is_complete:
+			complete_rows.append(row_index)
+
+	for column_index: int in range(Config.BOARD_SIZE):
+		var column_is_complete: bool = true
+		for row_index: int in range(Config.BOARD_SIZE):
+			var cell: Vector2i = Vector2i(column_index, row_index)
+			if _cells[row_index][column_index] == 0 and not placed_cells.has(cell):
+				column_is_complete = false
+				break
+		if column_is_complete:
+			complete_columns.append(column_index)
+
+	return {"rows": complete_rows, "cols": complete_columns}
