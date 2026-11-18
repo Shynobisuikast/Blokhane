@@ -4,8 +4,13 @@ extends Control
 
 signal piece_placed(cells: int)
 signal triplet_refilled
+signal lines_cleared(count: int, gain: int, multiplier: float)
+signal game_over(final_score: int, is_new_best: bool)
 
-enum DragState { IDLE, DRAGGING, RETURNING }
+const GameSessionScript = preload("res://scripts/GameSession.gd")
+const ClearFlowScript = preload("res://scripts/ClearFlow.gd")
+
+enum DragState { IDLE, DRAGGING, RETURNING, CLEARING, GAME_OVER }
 
 var _board_model: BoardModel
 var _piece_generator: PieceGenerator = PieceGenerator.new()
@@ -13,6 +18,10 @@ var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _board_view: BoardView
 var _tray: Tray
 var _drag_layer: DragLayer
+var _hud: Variant
+var _game_over_screen: Control
+var _session: Variant = GameSessionScript.new()
+var _clear_flow: Variant = ClearFlowScript.new()
 var _dragged_piece: Dictionary = {}
 var _dragged_slot: int = -1
 var _drag_state: int = DragState.IDLE
@@ -22,16 +31,33 @@ var _has_preview_origin: bool = false
 func _ready() -> void:
 	Input.emulate_mouse_from_touch = true
 
-func configure(board_view: BoardView, tray: Tray, drag_layer: DragLayer) -> void:
+func configure(
+	board_view: BoardView,
+	tray: Tray,
+	drag_layer: DragLayer,
+	hud: Control,
+	game_over_screen: Control
+) -> void:
 	_board_view = board_view
 	_tray = tray
 	_drag_layer = drag_layer
+	_hud = hud
+	_game_over_screen = game_over_screen
 	_board_model = BoardModel.new()
 	_board_view.set_model(_board_model)
+	_session.configure(
+		_board_model, _tray, _board_view, _drag_layer, _hud,
+		_game_over_screen, _piece_generator, _rng
+	)
+	_game_over_screen.connect("restart_requested", Callable(self, "restart"))
 
 func start_game() -> void:
 	_rng.randomize()
-	_tray.set_pieces(_piece_generator.generate_triplet(_board_model, _rng))
+	_session.start()
+
+func restart() -> void:
+	_session.restart()
+	_clear_drag_state()
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -102,12 +128,41 @@ func _drop_piece(pointer: Vector2) -> void:
 		return
 
 	var placed_cells: int = shape.size()
+	var lines: Dictionary = _board_model.find_full_lines()
+	var line_count: int = lines["rows"].size() + lines["cols"].size()
+	var cleared_cells: Dictionary = {}
+	if line_count > 0:
+		cleared_cells = _clear_flow.capture_and_clear(_board_model, lines)
+
+	var score_result: Dictionary = _session.score_model.register_turn(placed_cells, line_count)
+	_session.register_turn(line_count, int(score_result["streak"]))
+	var gain: int = score_result["gain"]
+	var multiplier: float = score_result["multiplier"]
+	_hud.update_score(
+		_session.score_model.score,
+		_session.score_model.best,
+		score_result["streak"],
+		multiplier,
+		gain
+	)
+
 	_tray.remove_piece(_dragged_slot)
 	_board_view.refresh()
 	_drag_layer.clear_piece()
 	_clear_drag_state()
+	if line_count > 0:
+		_drag_state = DragState.CLEARING
 	piece_placed.emit(placed_cells)
-	_refill_if_empty()
+	if line_count > 0:
+		lines_cleared.emit(line_count, gain, multiplier)
+		await _board_view.play_clear(cleared_cells, Config.CLEAR_TWEEN_TIME)
+		_drag_state = DragState.IDLE
+	if _session.refill_if_empty():
+		triplet_refilled.emit()
+	var game_over_result: Dictionary = _session.check_game_over()
+	if not game_over_result.is_empty():
+		_drag_state = DragState.GAME_OVER
+		game_over.emit(game_over_result["final_score"], game_over_result["is_new_best"])
 
 func _begin_return() -> void:
 	if _drag_state != DragState.DRAGGING:
@@ -136,12 +191,6 @@ func _clear_drag_state() -> void:
 	_dragged_slot = -1
 	_dragged_piece.clear()
 
-func _refill_if_empty() -> void:
-	for piece: Variant in _tray.pieces:
-		if piece != null:
-			return
-	_tray.set_pieces(_piece_generator.generate_triplet(_board_model, _rng))
-	triplet_refilled.emit()
 
 func _convert_position(source: Control, target: Control, local_position: Vector2) -> Vector2:
 	var canvas_position: Vector2 = source.get_global_transform_with_canvas() * local_position

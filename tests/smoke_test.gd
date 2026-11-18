@@ -7,6 +7,8 @@ const PieceGeneratorScript = preload("res://scripts/PieceGenerator.gd")
 const TrayScript = preload("res://scripts/Tray.gd")
 const DragMathTestRunnerScript = preload("res://tests/DragMathTestRunner.gd")
 const PreviewModelTestRunnerScript = preload("res://tests/PreviewModelTestRunner.gd")
+const ScoreModelTestRunnerScript = preload("res://tests/ScoreModelTestRunner.gd")
+const GameOverTestRunnerScript = preload("res://tests/GameOverTestRunner.gd")
 
 var _checks_total: int = 0
 var _checks_passed: int = 0
@@ -114,6 +116,8 @@ func _run_tests() -> void:
 	_run_piece_tests()
 	DragMathTestRunnerScript.run(self)
 	PreviewModelTestRunnerScript.run(self)
+	ScoreModelTestRunnerScript.run(self)
+	GameOverTestRunnerScript.run(self)
 
 func check(test_name: String, condition: bool) -> void:
 	_checks_total += 1

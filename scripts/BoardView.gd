@@ -15,6 +15,8 @@ var _preview_cells: Array[Vector2i] = []
 var _preview_color_id: int = 0
 var _preview_rows: Array[int] = []
 var _preview_columns: Array[int] = []
+var _clear_cells: Dictionary = {}
+var _clear_progress: float = 1.0
 
 func _init() -> void:
 	_panel_style = _make_style_box(Config.PANEL, Config.PANEL_RADIUS)
@@ -60,6 +62,23 @@ func clear_preview() -> void:
 	_preview_columns.clear()
 	queue_redraw()
 
+func play_clear(cells: Dictionary, duration: float) -> void:
+	if cells.is_empty():
+		return
+	_clear_cells = cells.duplicate()
+	_clear_progress = 0.0
+	queue_redraw()
+	var tween: Tween = create_tween()
+	tween.tween_method(_set_clear_progress, 0.0, 1.0, duration)
+	await tween.finished
+	_clear_cells.clear()
+	_clear_progress = 1.0
+	queue_redraw()
+
+func _set_clear_progress(progress: float) -> void:
+	_clear_progress = progress
+	queue_redraw()
+
 func cell_to_local(cell: Vector2i) -> Vector2:
 	return _grid_origin() + Vector2(
 		cell.x * (Config.CELL_SIZE + Config.GAP),
@@ -102,6 +121,13 @@ func _draw() -> void:
 			else:
 				draw_style_box(_style_for_color(color_id), cell_rect)
 				CellDrawingScript.draw_filled_cell_bevel(self, cell_rect, Config.CELL_RADIUS)
+
+	for cell: Vector2i in _clear_cells:
+		var cell_rect: Rect2 = Rect2(
+			cell_to_local(cell),
+			Vector2(Config.CELL_SIZE, Config.CELL_SIZE)
+		)
+		CellDrawingScript.draw_clear_cell(self, cell_rect, _clear_cells[cell], _clear_progress)
 
 	for cell: Vector2i in _preview_cells:
 		var shadow_rect: Rect2 = Rect2(

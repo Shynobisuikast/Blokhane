@@ -5,6 +5,8 @@
 [ext_resource type="Script" uid="uid://dgdffb2jnt5sy" path="res://scripts/Tray.gd" id="3_tray"]
 [ext_resource type="Script" uid="uid://dgsw7p4w5ikef" path="res://scripts/Game.gd" id="4_game"]
 [ext_resource type="Script" uid="uid://da7me5b5istum" path="res://scripts/DragLayer.gd" id="5_drag_layer"]
+[ext_resource type="Script" path="res://scripts/Hud.gd" id="6_hud"]
+[ext_resource type="PackedScene" path="res://scenes/GameOver.tscn" id="7_game_over"]
 
 [node name="Main" type="Control" unique_id=1346983468]
 layout_mode = 3
@@ -51,16 +53,28 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("4_game")
 
+[node name="Hud" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("6_hud")
+
 [node name="DragLayer" type="Control" parent="." unique_id=233678174]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 31.0
-offset_top = -206.0
-offset_right = 31.0
-offset_bottom = -206.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("5_drag_layer")
+
+[node name="GameOver" parent="." instance=ExtResource("7_game_over")]
