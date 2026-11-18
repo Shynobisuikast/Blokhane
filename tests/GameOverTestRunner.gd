@@ -4,7 +4,7 @@ extends RefCounted
 const BoardModelScript = preload("res://scripts/BoardModel.gd")
 const GameRulesScript = preload("res://scripts/GameRules.gd")
 const SaveDataScript = preload("res://scripts/SaveData.gd")
-const RunStatsScript = preload("res://scripts/RunStats.gd")
+
 const TEST_SAVE_PATH: String = "/tmp/blokhane_game_over_smoke_test.cfg"
 
 static func run(test_runner: Variant) -> void:
@@ -58,16 +58,6 @@ static func run(test_runner: Variant) -> void:
 	_remove_test_file(TEST_SAVE_PATH)
 	test_runner.check("52 bozuk kayıt dosyası çökmeden sıfır döndürür", corrupt_written and corrupt_best == 0)
 
-	var stats: Variant = RunStatsScript.new()
-	stats.register_turn(1, 1)
-	stats.register_turn(2, 2)
-	stats.register_turn(0, 0)
-	var totals_are_correct: bool = stats.lines_cleared_total == 3 and stats.max_streak == 2
-	stats.reset()
-	test_runner.check(
-		"53 koşu istatistikleri toplam çizgiyi ve maksimum seriyi tutup resetlenir",
-		totals_are_correct and stats.lines_cleared_total == 0 and stats.max_streak == 0
-	)
 
 static func _fill_board_except(
 	board: BoardModel,

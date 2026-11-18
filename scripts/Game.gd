@@ -49,7 +49,6 @@ func configure(
 		_board_model, _tray, _board_view, _drag_layer, _hud,
 		_game_over_screen, _piece_generator, _rng
 	)
-	_game_over_screen.connect("restart_requested", Callable(self, "restart"))
 
 func start_game() -> void:
 	_rng.randomize()
@@ -58,6 +57,12 @@ func start_game() -> void:
 func restart() -> void:
 	_session.restart()
 	_clear_drag_state()
+
+func cancel_drag() -> void:
+	if _drag_state == DragState.DRAGGING:
+		_tray.set_slot_hidden(_dragged_slot, false)
+		_drag_layer.clear_piece()
+		_clear_drag_state()
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -135,7 +140,7 @@ func _drop_piece(pointer: Vector2) -> void:
 		cleared_cells = _clear_flow.capture_and_clear(_board_model, lines)
 
 	var score_result: Dictionary = _session.score_model.register_turn(placed_cells, line_count)
-	_session.register_turn(line_count, int(score_result["streak"]))
+
 	var gain: int = score_result["gain"]
 	var multiplier: float = score_result["multiplier"]
 	_hud.update_score(
@@ -190,8 +195,6 @@ func _clear_drag_state() -> void:
 	_drag_state = DragState.IDLE
 	_dragged_slot = -1
 	_dragged_piece.clear()
-
-
 func _convert_position(source: Control, target: Control, local_position: Vector2) -> Vector2:
 	var canvas_position: Vector2 = source.get_global_transform_with_canvas() * local_position
 	return target.get_global_transform_with_canvas().affine_inverse() * canvas_position

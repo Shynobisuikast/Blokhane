@@ -19,18 +19,23 @@ static func draw_clear_cell(canvas: CanvasItem, original_rect: Rect2, color_id: 
 	var rect: Rect2 = Rect2(original_rect.get_center() - size / 2.0, size)
 	canvas.draw_style_box(style, rect)
 
-static func draw_filled_cell_bevel(canvas: CanvasItem, rect: Rect2, radius: float) -> void:
+static func draw_filled_cell_bevel(
+	canvas: CanvasItem,
+	rect: Rect2,
+	radius: float,
+	band_width: float = 3.0
+) -> void:
 	var left: float = rect.position.x + radius
 	var right: float = rect.end.x - radius
 	canvas.draw_line(
 		Vector2(left, rect.position.y + 1.5),
 		Vector2(right, rect.position.y + 1.5),
 		Color(1.0, 1.0, 1.0, 0.38),
-		3.0
+		band_width
 	)
 	canvas.draw_line(
 		Vector2(left, rect.end.y - 1.5),
 		Vector2(right, rect.end.y - 1.5),
 		Color(0.0, 0.0, 0.0, 0.30),
-		3.0
+		band_width
 	)

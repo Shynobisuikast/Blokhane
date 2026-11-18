@@ -3,12 +3,10 @@ class_name GameSession
 extends RefCounted
 
 const ScoreModelScript = preload("res://scripts/ScoreModel.gd")
-const RunStatsScript = preload("res://scripts/RunStats.gd")
 const GameRulesScript = preload("res://scripts/GameRules.gd")
 const SaveDataScript = preload("res://scripts/SaveData.gd")
 
 var score_model: Variant = ScoreModelScript.new()
-var run_stats: Variant = RunStatsScript.new()
 var _board_model: BoardModel
 var _tray: Tray
 var _board_view: BoardView
@@ -51,7 +49,7 @@ func restart() -> void:
 	_board_view.refresh()
 	_drag_layer.clear_piece()
 	score_model.reset()
-	run_stats.reset()
+
 	_hud.call("reset_score", score_model.score, score_model.best, score_model.streak)
 	_game_over_screen.hide()
 	_tray.set_pieces(_piece_generator.generate_triplet(_board_model, _rng))
@@ -63,8 +61,6 @@ func refill_if_empty() -> bool:
 	_tray.set_pieces(_piece_generator.generate_triplet(_board_model, _rng))
 	return true
 
-func register_turn(lines_cleared: int, streak: int) -> void:
-	run_stats.register_turn(lines_cleared, streak)
 
 func check_game_over() -> Dictionary:
 	var remaining_shapes: Array = []
@@ -80,8 +76,5 @@ func check_game_over() -> Dictionary:
 		_record_before_run = score_model.score
 		SaveDataScript.save_best(score_model.best)
 	_hud.call("update_score", score_model.score, score_model.best, score_model.streak, 1.0, 0)
-	_game_over_screen.call(
-		"show_result", score_model.score, run_stats.lines_cleared_total,
-		run_stats.max_streak, is_new_best
-	)
+	_game_over_screen.call("show_result", score_model.score, is_new_best)
 	return {"is_new_best": is_new_best, "final_score": score_model.score}

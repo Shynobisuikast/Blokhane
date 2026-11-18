@@ -21,9 +21,10 @@ Bütçe: 5 USD GPT kredisi. Her fazda harcanan krediyi kaydet.
 - [x] Faz 5 - Önizleme. Kabul: sürüklerken parça renginde gölge iz ve çizgi vurgusu görünür.
 - [x] Faz 6 - Temizleme ve skor. Kabul: satır/sütun siliniyor, skor artıyor.
 - [x] Faz 7 - Oyun sonu + en yüksek skor. Kabul: oyun bitiyor, skor kaydediliyor.
-- [ ] Faz 8 - Ana menü ve duraklat.
-- [ ] Faz 9 - Parlatma (animasyon, dokunma hedefleri, performans).
-- [ ] Faz 10 - Tema (koyu/açık).
+- [x] Faz 8 - Ana menü, duraklat ve ekran akışı.
+  - Ana menü düğmesini (GameOver) bağla.
+- [ ] Faz 9 - Tema (koyu/açık).
+- [ ] Faz 10 - Parlatma (animasyon, dokunma hedefleri, performans).
 - [ ] Faz 11 - Ses (opsiyonel).
 
 ## Kapsam dışı
@@ -40,6 +41,8 @@ Online skor tablosu, reklam, satın alma, çok oyunculu, mağaza yayını ayarla
 - Faz 6 bitti. Harcanan: __ USD
 - Faz 5 revizyon: kesikli önizleme gölge ize çevrildi. Harcanan: __ USD
 - Faz 7 bitti. Harcanan: __ USD
+- Faz 7 revizyon: istatistik kartları kaldırıldı, yazı boyutları SVG'ye çekildi. Harcanan: __ USD
+- Faz 8 bitti. Harcanan: __ USD
 
 ## Bütçe
 

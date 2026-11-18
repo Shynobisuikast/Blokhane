@@ -2,13 +2,12 @@
 extends SceneTree
 
 const BoardModelScript = preload("res://scripts/BoardModel.gd")
-const PiecesScript = preload("res://scripts/Pieces.gd")
-const PieceGeneratorScript = preload("res://scripts/PieceGenerator.gd")
-const TrayScript = preload("res://scripts/Tray.gd")
 const DragMathTestRunnerScript = preload("res://tests/DragMathTestRunner.gd")
 const PreviewModelTestRunnerScript = preload("res://tests/PreviewModelTestRunner.gd")
 const ScoreModelTestRunnerScript = preload("res://tests/ScoreModelTestRunner.gd")
 const GameOverTestRunnerScript = preload("res://tests/GameOverTestRunner.gd")
+const PieceTestRunnerScript = preload("res://tests/PieceTestRunner.gd")
+const ScreenFlowTestRunnerScript = preload("res://tests/ScreenFlowTestRunner.gd")
 
 var _checks_total: int = 0
 var _checks_passed: int = 0
@@ -113,11 +112,12 @@ func _run_tests() -> void:
 	check("İki hücre arasındaki boşluk hücre değildir", board_view.local_to_cell(gap_point) == Vector2i(-1, -1))
 	check("Panel dışındaki nokta hücre değildir", board_view.local_to_cell(Vector2.ZERO) == Vector2i(-1, -1))
 	board_view.free()
-	_run_piece_tests()
+	PieceTestRunnerScript.run(self)
 	DragMathTestRunnerScript.run(self)
 	PreviewModelTestRunnerScript.run(self)
 	ScoreModelTestRunnerScript.run(self)
 	GameOverTestRunnerScript.run(self)
+	ScreenFlowTestRunnerScript.run(self)
 
 func check(test_name: String, condition: bool) -> void:
 	_checks_total += 1
@@ -151,56 +151,3 @@ func _is_board_empty() -> bool:
 		if not _is_row_empty(row_index):
 			return false
 	return true
-
-func _run_piece_tests() -> void:
-	var catalog: Array[Dictionary] = PiecesScript.all()
-	check("18 parça kataloğu", catalog.size() >= 15 and catalog.size() <= 20)
-	var catalog_state: Dictionary = _catalog_state(catalog)
-	check("Şekiller normalize ve hücreleri benzersiz", catalog_state["normalized"])
-	check("Her şekil boş tahtaya sığar", catalog_state["fits"])
-	var generator: Variant = PieceGeneratorScript.new()
-	_fill_board_except([Vector2i.ZERO])
-	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
-	rng.seed = 3027
-	check("Tek boş hücrede 200 üretim adil", _fairness_holds(generator, rng))
-	_fill_board_except([Vector2i.ZERO, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.ONE])
-	rng.seed = 3028
-	check("2x2 boşlukta 200 üretim adil", _fairness_holds(generator, rng))
-	check("Üretici her zaman üç parça döndürür", generator.generate_triplet(_board, rng).size() == Config.TRAY_SLOTS)
-	var tray: Variant = TrayScript.new()
-	tray.set_pieces([_find_piece(catalog, "v2"), _find_piece(catalog, "l"), _find_piece(catalog, "sq2")])
-	check("Tepsi parçaları tasarım konumlarında ortalanır", tray.piece_cell_origin(0) == Vector2(75, 718) and tray.piece_cell_origin(1) == Vector2(208.5, 701.5) and tray.piece_cell_origin(2) == Vector2(358.5, 718))
-	tray.free()
-func _catalog_state(catalog: Array[Dictionary]) -> Dictionary:
-	var normalized: bool = true
-	var fits: bool = true
-	_board.reset()
-	for piece: Dictionary in catalog:
-		var shape: Array[Vector2i] = piece["shape"]
-		var min_x: int = shape[0].x if not shape.is_empty() else 0
-		var min_y: int = shape[0].y if not shape.is_empty() else 0
-		var cells_seen: Array[Vector2i] = []
-		for cell: Vector2i in shape:
-			min_x = mini(min_x, cell.x); min_y = mini(min_y, cell.y)
-			if cells_seen.has(cell): normalized = false
-			cells_seen.append(cell)
-		normalized = normalized and min_x == 0 and min_y == 0 and not shape.is_empty()
-		fits = fits and _board.can_fit_anywhere(shape)
-	return {"normalized": normalized, "fits": fits}
-func _fairness_holds(generator: Variant, rng: RandomNumberGenerator) -> bool:
-	for _iteration: int in range(200):
-		var has_fitting_piece: bool = false
-		for piece: Dictionary in generator.generate_triplet(_board, rng):
-			if _board.can_fit_anywhere(piece["shape"]): has_fitting_piece = true; break
-		if not has_fitting_piece: return false
-	return true
-func _fill_board_except(empty_cells: Array[Vector2i]) -> void:
-	_board.reset()
-	for index: int in range(Config.BOARD_SIZE * Config.BOARD_SIZE):
-		var cell: Vector2i = Vector2i(index % Config.BOARD_SIZE, index / Config.BOARD_SIZE)
-		if not empty_cells.has(cell): _board.place(_single_cell, cell, 1)
-
-func _find_piece(catalog: Array[Dictionary], piece_id: String) -> Dictionary:
-	for piece: Dictionary in catalog:
-		if piece["id"] == piece_id: return piece
-	return {}

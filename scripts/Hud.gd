@@ -2,8 +2,11 @@
 class_name Hud
 extends Control
 
+signal pause_requested
+
 var _pause_style: StyleBoxFlat
 var _pause_bar_style: StyleBoxFlat
+var _pause_hit_target: Button
 var _score: int = 0
 var _best: int = 0
 var _score_scale: float = 1.0
@@ -20,6 +23,7 @@ func _init() -> void:
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_build_pause_hit_target()
 
 func reset_score(score: int, best: int, streak: int) -> void:
 	if _score_tween != null and _score_tween.is_running():
@@ -48,6 +52,24 @@ func update_score(score: int, best: int, streak: int, multiplier: float, gain: i
 		_play_score_pop()
 	if _combo_visible:
 		_play_combo_pop()
+
+func _build_pause_hit_target() -> void:
+	_pause_hit_target = Button.new()
+	_pause_hit_target.position = Config.HUD_PAUSE_POSITION
+	_pause_hit_target.size = Config.HUD_PAUSE_SIZE
+	_pause_hit_target.focus_mode = Control.FOCUS_NONE
+	_pause_hit_target.mouse_filter = Control.MOUSE_FILTER_STOP
+	var empty_style: StyleBoxEmpty = StyleBoxEmpty.new()
+	_pause_hit_target.add_theme_stylebox_override("normal", empty_style)
+	_pause_hit_target.add_theme_stylebox_override("hover", empty_style)
+	_pause_hit_target.add_theme_stylebox_override("focus", empty_style)
+	var pressed_style: StyleBoxFlat = _make_style_box(
+		Color(1.0, 1.0, 1.0, Config.HUD_PAUSE_PRESSED_ALPHA),
+		Config.HUD_PAUSE_RADIUS
+	)
+	_pause_hit_target.add_theme_stylebox_override("pressed", pressed_style)
+	_pause_hit_target.pressed.connect(_on_pause_pressed)
+	add_child(_pause_hit_target)
 
 func _draw() -> void:
 	draw_style_box(_pause_style, Rect2(Config.HUD_PAUSE_POSITION, Config.HUD_PAUSE_SIZE))
@@ -163,6 +185,9 @@ func _play_combo_pop() -> void:
 func _set_combo_scale(scale: float) -> void:
 	_combo_scale = scale
 	queue_redraw()
+
+func _on_pause_pressed() -> void:
+	pause_requested.emit()
 
 func _make_style_box(color: Color, radius: int) -> StyleBoxFlat:
 	var style: StyleBoxFlat = StyleBoxFlat.new()
