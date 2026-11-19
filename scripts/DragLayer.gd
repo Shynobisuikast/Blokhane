@@ -9,6 +9,13 @@ var gap: float = Config.GAP
 var corner_radius: float = Config.CELL_RADIUS
 var _styles: Dictionary = {}
 
+func _ready() -> void:
+	ThemeAccess.connect_changed(_on_theme_changed)
+
+func _on_theme_changed() -> void:
+	_styles.clear()
+	queue_redraw()
+
 func show_piece(piece: Dictionary, origin: Vector2) -> void:
 	_piece = piece.duplicate(true)
 	cell_size = Config.CELL_SIZE
@@ -62,7 +69,7 @@ func _draw() -> void:
 func _style_for_color(color_id: int) -> StyleBoxFlat:
 	if not _styles.has(color_id):
 		var style: StyleBoxFlat = StyleBoxFlat.new()
-		style.bg_color = Config.color_for(color_id)
+		style.bg_color = ThemeAccess.color_for(color_id)
 		_styles[color_id] = style
 	var result: StyleBoxFlat = _styles[color_id]
 	result.set_corner_radius_all(roundi(corner_radius))

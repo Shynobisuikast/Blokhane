@@ -7,8 +7,17 @@ var _hidden_slots: Array[bool] = []
 var _panel_style: StyleBoxFlat
 var _piece_styles: Dictionary = {}
 
-func _init() -> void:
-	_panel_style = _make_style_box(Config.PANEL, Config.TRAY_CARD_RADIUS)
+func _ready() -> void:
+	ThemeAccess.connect_changed(_on_theme_changed)
+	_apply_theme()
+
+func _on_theme_changed() -> void:
+	_apply_theme()
+	queue_redraw()
+
+func _apply_theme() -> void:
+	_panel_style = _make_style_box(ThemeAccess.color("PANEL"), Config.TRAY_CARD_RADIUS)
+	_piece_styles.clear()
 
 func set_pieces(p: Array) -> void:
 	pieces.clear()
@@ -88,7 +97,7 @@ func _make_style_box(color: Color, radius: int) -> StyleBoxFlat:
 func _style_for_color(color_id: int) -> StyleBoxFlat:
 	if not _piece_styles.has(color_id):
 		_piece_styles[color_id] = _make_style_box(
-			Config.color_for(color_id),
+			ThemeAccess.color_for(color_id),
 			Config.TRAY_CELL_RADIUS
 		)
 	return _piece_styles[color_id] as StyleBoxFlat

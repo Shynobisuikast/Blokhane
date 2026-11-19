@@ -9,13 +9,16 @@ static func run(test_runner: Variant) -> void:
 
 	var menu_to_playing: Variant = ScreenFlowScript.new()
 	var menu_valid: bool = menu_to_playing.go(ScreenFlowScript.Screen.PLAYING)
+	var menu_to_settings: Variant = ScreenFlowScript.new()
+	var settings_valid: bool = menu_to_settings.go(ScreenFlowScript.Screen.SETTINGS)
 	var menu_invalid: Variant = ScreenFlowScript.new()
 	var pause_rejected: bool = not menu_invalid.go(ScreenFlowScript.Screen.PAUSED)
 	var menu_still_menu: bool = menu_invalid.current == ScreenFlowScript.Screen.MENU
 	var game_over_rejected: bool = not menu_invalid.go(ScreenFlowScript.Screen.GAME_OVER)
 	test_runner.check(
-		"54 MENU geçişleri yalnızca PLAYING'e izin verir",
+		"54 MENU yalnızca PLAYING ve SETTINGS'e geçebilir",
 		menu_valid and menu_to_playing.current == ScreenFlowScript.Screen.PLAYING
+		and settings_valid and menu_to_settings.current == ScreenFlowScript.Screen.SETTINGS
 		and pause_rejected and game_over_rejected and menu_still_menu
 	)
 
@@ -53,12 +56,31 @@ static func run(test_runner: Variant) -> void:
 	var matrix_valid: bool = _transition_matrix_holds()
 	test_runner.check("58 tüm geçiş matrisi geçerli listeyle eşleşir", matrix_valid)
 
+	var settings_flow: Variant = ScreenFlowScript.new()
+	settings_flow.current = ScreenFlowScript.Screen.SETTINGS
+	var settings_to_menu: bool = settings_flow.go(ScreenFlowScript.Screen.MENU)
+	var settings_invalid: Variant = ScreenFlowScript.new()
+	settings_invalid.current = ScreenFlowScript.Screen.SETTINGS
+	var invalid_settings_targets: bool = true
+	for target: int in [
+		ScreenFlowScript.Screen.PLAYING,
+		ScreenFlowScript.Screen.PAUSED,
+		ScreenFlowScript.Screen.GAME_OVER
+	]:
+		invalid_settings_targets = invalid_settings_targets and not settings_invalid.go(target)
+	test_runner.check(
+		"59 SETTINGS yalnızca MENU'ye döner",
+		settings_to_menu and settings_flow.current == ScreenFlowScript.Screen.MENU
+		and invalid_settings_targets and settings_invalid.current == ScreenFlowScript.Screen.SETTINGS
+	)
+
 static func _transition_matrix_holds() -> bool:
 	var screens: Array[int] = [
 		ScreenFlowScript.Screen.MENU,
 		ScreenFlowScript.Screen.PLAYING,
 		ScreenFlowScript.Screen.PAUSED,
-		ScreenFlowScript.Screen.GAME_OVER
+		ScreenFlowScript.Screen.GAME_OVER,
+		ScreenFlowScript.Screen.SETTINGS
 	]
 	for from_screen: int in screens:
 		for to_screen: int in screens:
@@ -77,11 +99,13 @@ static func _transition_matrix_holds() -> bool:
 static func _is_allowed(from_screen: int, to_screen: int) -> bool:
 	match from_screen:
 		ScreenFlowScript.Screen.MENU:
-			return to_screen == ScreenFlowScript.Screen.PLAYING
+			return to_screen == ScreenFlowScript.Screen.PLAYING or to_screen == ScreenFlowScript.Screen.SETTINGS
 		ScreenFlowScript.Screen.PLAYING:
 			return to_screen == ScreenFlowScript.Screen.PAUSED or to_screen == ScreenFlowScript.Screen.GAME_OVER
 		ScreenFlowScript.Screen.PAUSED:
 			return to_screen == ScreenFlowScript.Screen.PLAYING or to_screen == ScreenFlowScript.Screen.MENU
 		ScreenFlowScript.Screen.GAME_OVER:
 			return to_screen == ScreenFlowScript.Screen.PLAYING or to_screen == ScreenFlowScript.Screen.MENU
+		ScreenFlowScript.Screen.SETTINGS:
+			return to_screen == ScreenFlowScript.Screen.MENU
 	return false

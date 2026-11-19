@@ -27,6 +27,8 @@ var _dragged_slot: int = -1
 var _drag_state: int = DragState.IDLE
 var _preview_origin: Vector2i = Vector2i.ZERO
 var _has_preview_origin: bool = false
+var _touch_contact_active: bool = false
+var _drag_started_touch: bool = false
 
 func _ready() -> void:
 	Input.emulate_mouse_from_touch = true
@@ -64,6 +66,10 @@ func cancel_drag() -> void:
 		_drag_layer.clear_piece()
 		_clear_drag_state()
 
+func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		_touch_contact_active = event.pressed
+
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.button_index != MOUSE_BUTTON_LEFT:
@@ -91,6 +97,7 @@ func _begin_drag(pointer: Vector2) -> void:
 		return
 	_dragged_slot = slot
 	_dragged_piece = (_tray.pieces[slot] as Dictionary).duplicate(true)
+	_drag_started_touch = _touch_contact_active
 	_drag_state = DragState.DRAGGING
 	_has_preview_origin = false
 	_tray.set_slot_hidden(slot, true)
@@ -102,7 +109,8 @@ func _move_drag(pointer: Vector2) -> void:
 		return
 	var layer_pointer: Vector2 = _convert_position(self, _drag_layer, pointer)
 	var shape: Array[Vector2i] = _dragged_piece["shape"]
-	_drag_layer.set_top_left(DragMath.piece_top_left(layer_pointer, shape))
+	var drag_offset_y: float = Config.DRAG_OFFSET_Y_TOUCH if _drag_started_touch else Config.DRAG_OFFSET_Y_MOUSE
+	_drag_layer.set_top_left(DragMath.piece_top_left(layer_pointer, shape, drag_offset_y))
 	var board_top_left: Vector2 = _convert_position(_drag_layer, _board_view, _drag_layer.top_left)
 	var target_origin: Vector2i = DragMath.snap_origin(board_top_left, _board_view)
 	if _has_preview_origin and target_origin == _preview_origin:
@@ -195,6 +203,9 @@ func _clear_drag_state() -> void:
 	_drag_state = DragState.IDLE
 	_dragged_slot = -1
 	_dragged_piece.clear()
+	_drag_started_touch = false
+	_touch_contact_active = false
+
 func _convert_position(source: Control, target: Control, local_position: Vector2) -> Vector2:
 	var canvas_position: Vector2 = source.get_global_transform_with_canvas() * local_position
 	return target.get_global_transform_with_canvas().affine_inverse() * canvas_position

@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://scenes/GameOver.tscn" id="7_game_over"]
 [ext_resource type="PackedScene" path="res://scenes/Pause.tscn" id="8_pause"]
 [ext_resource type="PackedScene" path="res://scenes/Menu.tscn" id="9_menu"]
+[ext_resource type="PackedScene" path="res://scenes/Settings.tscn" id="10_settings"]
 
 [node name="Main" type="Control" unique_id=1346983468]
 layout_mode = 3
@@ -82,3 +83,5 @@ script = ExtResource("5_drag_layer")
 [node name="Pause" parent="." instance=ExtResource("8_pause")]
 
 [node name="Menu" parent="." instance=ExtResource("9_menu")]
+
+[node name="Settings" parent="." instance=ExtResource("10_settings")]

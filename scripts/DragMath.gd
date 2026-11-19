@@ -2,7 +2,11 @@
 class_name DragMath
 extends RefCounted
 
-static func piece_top_left(pointer: Vector2, shape: Array[Vector2i]) -> Vector2:
+static func piece_top_left(
+	pointer: Vector2,
+	shape: Array[Vector2i],
+	drag_offset_y: float
+) -> Vector2:
 	var shape_size: Vector2i = Pieces.size_of(shape)
 	var piece_extent: Vector2 = Vector2(
 		shape_size.x * Config.CELL_SIZE + maxi(shape_size.x - 1, 0) * Config.GAP,
@@ -10,7 +14,7 @@ static func piece_top_left(pointer: Vector2, shape: Array[Vector2i]) -> Vector2:
 	)
 	return Vector2(
 		pointer.x - piece_extent.x / 2.0,
-		pointer.y - Config.DRAG_OFFSET_Y - piece_extent.y
+		pointer.y - drag_offset_y - piece_extent.y
 	)
 
 static func snap_origin(top_left: Vector2, board_view: BoardView) -> Vector2i:

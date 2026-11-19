@@ -7,16 +7,6 @@ const CELL_SIZE: int = 48
 const GAP: int = 4
 const SCREEN_SIZE: Vector2i = Vector2i(480, 860)
 
-const BG: Color = Color("#0D1A38")
-const PANEL: Color = Color("#14264F")
-const CELL_EMPTY: Color = Color("#22407F")
-const BLUE: Color = Color("#3F6BFF")
-const TEAL: Color = Color("#1FB8A8")
-const YELLOW: Color = Color("#F2B632")
-const RED: Color = Color("#E8553E")
-const GREEN: Color = Color("#3FA66B")
-const TEXT: Color = Color("#F2EEE4")
-const TEXT_SECONDARY: Color = Color("#9FB0D4")
 
 const PANEL_RADIUS: int = 22
 const CELL_RADIUS: int = 7
@@ -47,10 +37,9 @@ const MENU_SETTINGS_POSITION: Vector2 = Vector2(70, 619)
 const MENU_SETTINGS_SIZE: Vector2 = Vector2(340, 60)
 const MENU_SETTINGS_RADIUS: int = 18
 const MENU_SETTINGS_FONT_SIZE: int = 22
-const MENU_BEST_LABEL_POSITION: Vector2 = Vector2(190, 719)
-const MENU_BEST_LABEL_WIDTH: float = 100.0
+const MENU_BEST_LABEL_POSITION: Vector2 = Vector2(0, 719)
 const MENU_BEST_LABEL_FONT_SIZE: int = 16
-const MENU_BEST_VALUE_POSITION: Vector2 = Vector2(190, 750)
+const MENU_BEST_VALUE_POSITION: Vector2 = Vector2(0, 750)
 const MENU_BEST_VALUE_FONT_SIZE: int = 34
 
 # Duraklat ekranının ölçüleri özel tasarım kararıdır; menu.svg referansından alınmamıştır.
@@ -67,6 +56,28 @@ const PAUSE_MENU_SIZE: Vector2 = Vector2(340, 60)
 const PAUSE_MENU_RADIUS: int = 18
 const PAUSE_MENU_FONT_SIZE: int = 20
 
+# Ayarlar ekranı ölçüleri tasarım SVG'sinde bulunmayan özel tasarım kararıdır.
+const SETTINGS_TITLE_POSITION: Vector2 = Vector2(22, 184)
+const SETTINGS_TITLE_SIZE: Vector2 = Vector2(436, 50)
+const SETTINGS_TITLE_FONT_SIZE: int = 42
+const SETTINGS_THEME_LABEL_POSITION: Vector2 = Vector2(70, 262)
+const SETTINGS_THEME_LABEL_FONT_SIZE: int = 16
+const SETTINGS_DARK_POSITION: Vector2 = Vector2(70, 278)
+const SETTINGS_LIGHT_POSITION: Vector2 = Vector2(245, 278)
+const SETTINGS_THEME_OPTION_SIZE: Vector2 = Vector2(165, 60)
+const SETTINGS_THEME_OPTION_RADIUS: int = 18
+const SETTINGS_THEME_OPTION_FONT_SIZE: int = 20
+const SETTINGS_RESET_POSITION: Vector2 = Vector2(70, 370)
+const SETTINGS_RESET_SIZE: Vector2 = Vector2(340, 60)
+const SETTINGS_RESET_RADIUS: int = 18
+const SETTINGS_RESET_FONT_SIZE: int = 20
+const SETTINGS_RESET_CONFIRM_SECONDS: float = 3.0
+const SETTINGS_RESET_DONE_SECONDS: float = 2.0
+const SETTINGS_BACK_POSITION: Vector2 = Vector2(70, 452)
+const SETTINGS_BACK_SIZE: Vector2 = Vector2(340, 60)
+const SETTINGS_BACK_RADIUS: int = 18
+const SETTINGS_BACK_FONT_SIZE: int = 20
+
 const HUD_PAUSE_PRESSED_ALPHA: float = 0.10
 const GHOST_ALPHA: float = 0.40
 const GHOST_SHADOW_ALPHA: float = 0.30
@@ -81,8 +92,7 @@ const SCORE_POP_TIME: float = 0.12
 const SCORE_POP_SCALE: float = 1.15
 const COMBO_POP_TIME: float = 0.12
 const COMBO_POP_START_SCALE: float = 0.9
-const COMBO_PILL_COLOR: Color = YELLOW
-const COMBO_TEXT_COLOR: Color = BG
+
 const COMBO_FONT_SIZE: int = 18
 const COMBO_PILL_POSITION: Vector2 = Vector2(164, 154.5)
 const COMBO_PILL_SIZE: Vector2 = Vector2(152, 35)
@@ -146,20 +156,9 @@ const TRAY_CELL: int = 30
 const TRAY_GAP: int = 3
 const TRAY_CELL_RADIUS: int = 5
 const TRAY_SLOTS: int = 3
-const DRAG_OFFSET_Y: int = 0
+const DRAG_OFFSET_Y_MOUSE: int = 0
+const DRAG_OFFSET_Y_TOUCH: int = 80
 const RETURN_TWEEN_TIME: float = 0.15
 
 static func color_for(id: int) -> Color:
-	match id:
-		1:
-			return BLUE
-		2:
-			return TEAL
-		3:
-			return YELLOW
-		4:
-			return RED
-		5:
-			return GREEN
-		_:
-			return CELL_EMPTY
+	return ThemeAccess.color_for(id)

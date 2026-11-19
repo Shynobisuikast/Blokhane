@@ -8,6 +8,7 @@ const ScoreModelTestRunnerScript = preload("res://tests/ScoreModelTestRunner.gd"
 const GameOverTestRunnerScript = preload("res://tests/GameOverTestRunner.gd")
 const PieceTestRunnerScript = preload("res://tests/PieceTestRunner.gd")
 const ScreenFlowTestRunnerScript = preload("res://tests/ScreenFlowTestRunner.gd")
+const ThemeTestRunnerScript = preload("res://tests/ThemeTestRunner.gd")
 
 var _checks_total: int = 0
 var _checks_passed: int = 0
@@ -118,6 +119,7 @@ func _run_tests() -> void:
 	ScoreModelTestRunnerScript.run(self)
 	GameOverTestRunnerScript.run(self)
 	ScreenFlowTestRunnerScript.run(self)
+	ThemeTestRunnerScript.run(self)
 
 func check(test_name: String, condition: bool) -> void:
 	_checks_total += 1

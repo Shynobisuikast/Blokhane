@@ -17,13 +17,19 @@ var _combo_multiplier: float = 1.0
 var _combo_gain: int = 0
 var _combo_tween: Tween
 
-func _init() -> void:
-	_pause_style = _make_style_box(Config.PANEL, Config.HUD_PAUSE_RADIUS)
-	_pause_bar_style = _make_style_box(Config.TEXT, Config.HUD_PAUSE_BAR_RADIUS)
-
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_build_pause_hit_target()
+	ThemeAccess.connect_changed(_on_theme_changed)
+	_apply_theme()
+
+func _on_theme_changed() -> void:
+	_apply_theme()
+	queue_redraw()
+
+func _apply_theme() -> void:
+	_pause_style = _make_style_box(ThemeAccess.color("PANEL"), Config.HUD_PAUSE_RADIUS)
+	_pause_bar_style = _make_style_box(ThemeAccess.color("TEXT"), Config.HUD_PAUSE_BAR_RADIUS)
 
 func reset_score(score: int, best: int, streak: int) -> void:
 	if _score_tween != null and _score_tween.is_running():
@@ -89,7 +95,7 @@ func _draw() -> void:
 		HORIZONTAL_ALIGNMENT_CENTER,
 		Config.HUD_SCORE_AREA_WIDTH,
 		Config.HUD_SCORE_LABEL_FONT_SIZE,
-		Config.TEXT_SECONDARY
+		ThemeAccess.color("TEXT_SECONDARY")
 	)
 	draw_set_transform(
 		Vector2(Config.HUD_SCORE_CENTER_X, Config.HUD_SCORE_VALUE_BASELINE),
@@ -103,7 +109,7 @@ func _draw() -> void:
 		HORIZONTAL_ALIGNMENT_CENTER,
 		Config.HUD_SCORE_AREA_WIDTH,
 		Config.HUD_SCORE_FONT_SIZE,
-		Config.TEXT
+		ThemeAccess.color("TEXT")
 	)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
@@ -114,7 +120,7 @@ func _draw() -> void:
 		HORIZONTAL_ALIGNMENT_RIGHT,
 		Config.HUD_BEST_AREA_WIDTH,
 		Config.HUD_SCORE_LABEL_FONT_SIZE,
-		Config.TEXT_SECONDARY
+		ThemeAccess.color("TEXT_SECONDARY")
 	)
 	draw_string(
 		ThemeDB.fallback_font,
@@ -123,7 +129,7 @@ func _draw() -> void:
 		HORIZONTAL_ALIGNMENT_RIGHT,
 		Config.HUD_BEST_AREA_WIDTH,
 		Config.HUD_BEST_FONT_SIZE,
-		Config.YELLOW
+		ThemeAccess.color("ACCENT")
 	)
 
 	if _combo_visible:
@@ -136,10 +142,10 @@ func _draw_combo_pill() -> void:
 	draw_set_transform(center, 0.0, Vector2.ONE * _combo_scale)
 	draw_rect(
 		Rect2(Vector2(-size.x / 2.0 + radius, -size.y / 2.0), Vector2(size.x - radius * 2.0, size.y)),
-		Config.COMBO_PILL_COLOR
+		ThemeAccess.color("ACCENT")
 	)
-	draw_circle(Vector2(-size.x / 2.0 + radius, 0.0), radius, Config.COMBO_PILL_COLOR)
-	draw_circle(Vector2(size.x / 2.0 - radius, 0.0), radius, Config.COMBO_PILL_COLOR)
+	draw_circle(Vector2(-size.x / 2.0 + radius, 0.0), radius, ThemeAccess.color("ACCENT"))
+	draw_circle(Vector2(size.x / 2.0 - radius, 0.0), radius, ThemeAccess.color("ACCENT"))
 	draw_string(
 		ThemeDB.fallback_font,
 		Vector2(-size.x / 2.0, Config.COMBO_TEXT_BASELINE_OFFSET),
@@ -147,7 +153,7 @@ func _draw_combo_pill() -> void:
 		HORIZONTAL_ALIGNMENT_CENTER,
 		size.x,
 		Config.COMBO_FONT_SIZE,
-		Config.COMBO_TEXT_COLOR
+		ThemeAccess.color("ON_ACCENT")
 	)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 

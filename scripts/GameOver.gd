@@ -14,6 +14,16 @@ var _menu_button: Button
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_build_buttons()
+	ThemeAccess.connect_changed(_on_theme_changed)
+	_apply_theme()
+
+func _on_theme_changed() -> void:
+	_apply_theme()
+	queue_redraw()
+
+func _apply_theme() -> void:
+	_set_button_theme(_restart_button, ThemeAccess.color("ACCENT"), ThemeAccess.color("ON_ACCENT"), Config.GAME_OVER_RESTART_RADIUS)
+	_set_button_theme(_menu_button, ThemeAccess.color("PANEL"), ThemeAccess.color("TEXT"), Config.GAME_OVER_MENU_RADIUS)
 
 func show_result(final_score: int, is_new_best: bool) -> void:
 	_final_score = final_score
@@ -22,12 +32,12 @@ func show_result(final_score: int, is_new_best: bool) -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	draw_rect(Rect2(Vector2.ZERO, Config.SCREEN_SIZE), Config.BG)
+	draw_rect(Rect2(Vector2.ZERO, Config.SCREEN_SIZE), ThemeAccess.color("BG"))
 	_draw_rounded_rect(
 		Config.GAME_OVER_CARD_POSITION,
 		Config.GAME_OVER_CARD_SIZE,
 		Config.GAME_OVER_CARD_RADIUS,
-		Config.PANEL
+		ThemeAccess.color("PANEL")
 	)
 
 	if _is_new_best:
@@ -35,7 +45,7 @@ func _draw() -> void:
 			Config.GAME_OVER_RECORD_POSITION,
 			Config.GAME_OVER_RECORD_SIZE,
 			Config.GAME_OVER_RECORD_RADIUS,
-			Config.YELLOW
+			ThemeAccess.color("ACCENT")
 		)
 
 	draw_string(
@@ -45,7 +55,7 @@ func _draw() -> void:
 		HORIZONTAL_ALIGNMENT_CENTER,
 		Config.GAME_OVER_TITLE_SIZE.x,
 		Config.GAME_OVER_TITLE_FONT_SIZE,
-		Config.TEXT
+		ThemeAccess.color("TEXT")
 	)
 	draw_string(
 		ThemeDB.fallback_font,
@@ -54,7 +64,7 @@ func _draw() -> void:
 		HORIZONTAL_ALIGNMENT_CENTER,
 		Config.GAME_OVER_SCORE_LABEL_SIZE.x,
 		Config.GAME_OVER_LABEL_FONT_SIZE,
-		Config.TEXT_SECONDARY
+		ThemeAccess.color("TEXT_SECONDARY")
 	)
 	draw_string(
 		ThemeDB.fallback_font,
@@ -63,7 +73,7 @@ func _draw() -> void:
 		HORIZONTAL_ALIGNMENT_CENTER,
 		Config.GAME_OVER_SCORE_VALUE_SIZE.x,
 		Config.GAME_OVER_SCORE_FONT_SIZE,
-		Config.TEXT
+		ThemeAccess.color("TEXT")
 	)
 	if _is_new_best:
 		draw_string(
@@ -73,7 +83,7 @@ func _draw() -> void:
 			HORIZONTAL_ALIGNMENT_CENTER,
 			Config.GAME_OVER_RECORD_SIZE.x,
 			Config.GAME_OVER_RECORD_FONT_SIZE,
-			Config.BG
+			ThemeAccess.color("ON_ACCENT")
 		)
 
 func _build_buttons() -> void:
@@ -81,8 +91,8 @@ func _build_buttons() -> void:
 		"Tekrar oyna",
 		Config.GAME_OVER_RESTART_POSITION,
 		Config.GAME_OVER_RESTART_SIZE,
-		Config.YELLOW,
-		Config.BG,
+		ThemeAccess.color("ACCENT"),
+		ThemeAccess.color("ON_ACCENT"),
 		Config.GAME_OVER_RESTART_RADIUS,
 		Config.GAME_OVER_RESTART_FONT_SIZE
 	)
@@ -91,8 +101,8 @@ func _build_buttons() -> void:
 		"Ana menü",
 		Config.GAME_OVER_MENU_POSITION,
 		Config.GAME_OVER_MENU_SIZE,
-		Config.PANEL,
-		Config.TEXT,
+		ThemeAccess.color("PANEL"),
+		ThemeAccess.color("TEXT"),
 		Config.GAME_OVER_MENU_RADIUS,
 		Config.GAME_OVER_MENU_FONT_SIZE
 	)
@@ -123,6 +133,16 @@ func _make_button(
 	button.add_theme_stylebox_override("focus", _make_style_box(fill, radius))
 	add_child(button)
 	return button
+
+func _set_button_theme(button: Button, fill: Color, text_color: Color, radius: int) -> void:
+	button.add_theme_color_override("font_color", text_color)
+	button.add_theme_color_override("font_hover_color", text_color)
+	button.add_theme_color_override("font_pressed_color", text_color)
+	var style: StyleBoxFlat = _make_style_box(fill, radius)
+	button.add_theme_stylebox_override("normal", style)
+	button.add_theme_stylebox_override("hover", style)
+	button.add_theme_stylebox_override("pressed", style)
+	button.add_theme_stylebox_override("focus", style)
 
 func _draw_rounded_rect(rect_origin: Vector2, rect_size: Vector2, radius: float, color: Color) -> void:
 	draw_rect(Rect2(rect_origin + Vector2(radius, 0.0), Vector2(rect_size.x - radius * 2.0, rect_size.y)), color)

@@ -18,14 +18,24 @@ var _preview_columns: Array[int] = []
 var _clear_cells: Dictionary = {}
 var _clear_progress: float = 1.0
 
-func _init() -> void:
-	_panel_style = _make_style_box(Config.PANEL, Config.PANEL_RADIUS)
-	_empty_style = _make_style_box(Config.CELL_EMPTY, Config.CELL_RADIUS)
+func _ready() -> void:
+	ThemeAccess.connect_changed(_on_theme_changed)
+	_apply_theme()
+
+func _on_theme_changed() -> void:
+	_apply_theme()
+	queue_redraw()
+
+func _apply_theme() -> void:
+	_panel_style = _make_style_box(ThemeAccess.color("PANEL"), Config.PANEL_RADIUS)
+	_empty_style = _make_style_box(ThemeAccess.color("CELL_EMPTY"), Config.CELL_RADIUS)
 	_highlight_style = _make_style_box(Config.LINE_HIGHLIGHT, Config.CELL_RADIUS)
 	_ghost_shadow_style = _make_style_box(
 		Color(0.0, 0.0, 0.0, Config.GHOST_SHADOW_ALPHA),
 		Config.CELL_RADIUS
 	)
+	_filled_styles.clear()
+	_ghost_styles.clear()
 
 func set_model(m: BoardModel) -> void:
 	model = m
@@ -156,7 +166,7 @@ func _draw() -> void:
 
 func _style_for_ghost_color(color_id: int) -> StyleBoxFlat:
 	if not _ghost_styles.has(color_id):
-		var ghost_color: Color = Config.color_for(color_id)
+		var ghost_color: Color = ThemeAccess.color_for(color_id)
 		ghost_color.a = Config.GHOST_ALPHA
 		_ghost_styles[color_id] = _make_style_box(ghost_color, Config.CELL_RADIUS)
 	return _ghost_styles[color_id] as StyleBoxFlat
@@ -183,7 +193,7 @@ func _make_style_box(color: Color, radius: int) -> StyleBoxFlat:
 func _style_for_color(color_id: int) -> StyleBoxFlat:
 	if not _filled_styles.has(color_id):
 		_filled_styles[color_id] = _make_style_box(
-			Config.color_for(color_id),
+			ThemeAccess.color_for(color_id),
 			Config.CELL_RADIUS
 		)
 	return _filled_styles[color_id] as StyleBoxFlat

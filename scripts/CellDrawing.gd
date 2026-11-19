@@ -11,7 +11,7 @@ static func draw_clear_cell(canvas: CanvasItem, original_rect: Rect2, color_id: 
 	if not _clear_styles.has(color_id):
 		_clear_styles[color_id] = StyleBoxFlat.new()
 	var style: StyleBoxFlat = _clear_styles[color_id]
-	var tint: Color = Config.color_for(color_id)
+	var tint: Color = ThemeAccess.color_for(color_id)
 	tint.a = scale
 	style.bg_color = tint
 	style.set_corner_radius_all(roundi(Config.CELL_RADIUS * scale))

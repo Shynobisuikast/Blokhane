@@ -9,18 +9,27 @@ const PiecesScript = preload("res://scripts/Pieces.gd")
 static func run(test_runner: Variant) -> void:
 	var dot: Array[Vector2i] = [Vector2i.ZERO]
 	var pointer: Vector2 = Vector2(240, 500)
-	var dot_top_left: Vector2 = DragMathScript.piece_top_left(pointer, dot)
-	var expected_bottom: float = pointer.y - Config.DRAG_OFFSET_Y
+	var dot_top_left: Vector2 = DragMathScript.piece_top_left(pointer, dot, Config.DRAG_OFFSET_Y_MOUSE)
+	var expected_bottom: float = pointer.y - Config.DRAG_OFFSET_Y_MOUSE
+	var touch_top_left: Vector2 = DragMathScript.piece_top_left(
+		pointer,
+		dot,
+		Config.DRAG_OFFSET_Y_TOUCH
+	)
 	test_runner.check(
-		"23 tek hücre imlece yatay ortalı ve offset kadar yukarıda",
+		"23 fare ofseti 0, dokunmatik ofseti 80 piksel uygulanır",
 		is_equal_approx(dot_top_left.x, pointer.x - Config.CELL_SIZE / 2.0)
 		and is_equal_approx(dot_top_left.y + Config.CELL_SIZE, expected_bottom)
+		and is_equal_approx(
+			touch_top_left.y + Config.CELL_SIZE,
+			pointer.y - Config.DRAG_OFFSET_Y_TOUCH
+		)
 	)
 
 	var h3: Array[Vector2i] = [Vector2i.ZERO, Vector2i.RIGHT, Vector2i(2, 0)]
 	var v3: Array[Vector2i] = [Vector2i.ZERO, Vector2i.DOWN, Vector2i(0, 2)]
-	var h3_top_left: Vector2 = DragMathScript.piece_top_left(pointer, h3)
-	var v3_top_left: Vector2 = DragMathScript.piece_top_left(pointer, v3)
+	var h3_top_left: Vector2 = DragMathScript.piece_top_left(pointer, h3, Config.DRAG_OFFSET_Y_MOUSE)
+	var v3_top_left: Vector2 = DragMathScript.piece_top_left(pointer, v3, Config.DRAG_OFFSET_Y_MOUSE)
 	test_runner.check(
 		"24 yatay üçlü daha solda, dikey üçlü daha yukarıda başlar",
 		h3_top_left.x < v3_top_left.x and h3_top_left.y > v3_top_left.y
