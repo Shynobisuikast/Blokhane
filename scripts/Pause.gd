@@ -86,6 +86,7 @@ func _make_button(
 	button.add_theme_stylebox_override("pressed", style)
 	button.add_theme_stylebox_override("focus", style)
 	add_child(button)
+	ButtonFeedback.apply(button)
 	return button
 
 func _set_button_theme(button: Button, fill: Color, text_color: Color, radius: int) -> void:

@@ -6,7 +6,11 @@ signal pause_requested
 
 var _pause_style: StyleBoxFlat
 var _pause_bar_style: StyleBoxFlat
+var _pause_pressed_style: StyleBoxFlat
 var _pause_hit_target: Button
+var _pause_background: Panel
+var _pause_pressed_overlay: Panel
+var _pause_bars: Array[Panel] = []
 var _score: int = 0
 var _best: int = 0
 var _score_scale: float = 1.0
@@ -19,9 +23,9 @@ var _combo_tween: Tween
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_apply_theme()
 	_build_pause_hit_target()
 	ThemeAccess.connect_changed(_on_theme_changed)
-	_apply_theme()
 
 func _on_theme_changed() -> void:
 	_apply_theme()
@@ -30,6 +34,17 @@ func _on_theme_changed() -> void:
 func _apply_theme() -> void:
 	_pause_style = _make_style_box(ThemeAccess.color("PANEL"), Config.HUD_PAUSE_RADIUS)
 	_pause_bar_style = _make_style_box(ThemeAccess.color("TEXT"), Config.HUD_PAUSE_BAR_RADIUS)
+	_pause_pressed_style = _make_style_box(
+		Color(1.0, 1.0, 1.0, Config.HUD_PAUSE_PRESSED_ALPHA),
+		Config.HUD_PAUSE_RADIUS
+	)
+	if _pause_background != null:
+		_pause_background.add_theme_stylebox_override("panel", _pause_style)
+	if _pause_pressed_overlay != null:
+		_pause_pressed_overlay.add_theme_stylebox_override("panel", _pause_pressed_style)
+	for pause_bar: Panel in _pause_bars:
+		pause_bar.add_theme_stylebox_override("panel", _pause_bar_style)
+
 
 func reset_score(score: int, best: int, streak: int) -> void:
 	if _score_tween != null and _score_tween.is_running():
@@ -61,33 +76,63 @@ func update_score(score: int, best: int, streak: int, multiplier: float, gain: i
 
 func _build_pause_hit_target() -> void:
 	_pause_hit_target = Button.new()
-	_pause_hit_target.position = Config.HUD_PAUSE_POSITION
-	_pause_hit_target.size = Config.HUD_PAUSE_SIZE
+	_pause_hit_target.size = Config.HUD_PAUSE_HIT_TARGET_SIZE
+	_pause_hit_target.position = (
+		Config.HUD_PAUSE_POSITION
+		+ (Config.HUD_PAUSE_SIZE - Config.HUD_PAUSE_HIT_TARGET_SIZE) / 2.0
+	)
 	_pause_hit_target.focus_mode = Control.FOCUS_NONE
 	_pause_hit_target.mouse_filter = Control.MOUSE_FILTER_STOP
 	var empty_style: StyleBoxEmpty = StyleBoxEmpty.new()
 	_pause_hit_target.add_theme_stylebox_override("normal", empty_style)
 	_pause_hit_target.add_theme_stylebox_override("hover", empty_style)
+	_pause_hit_target.add_theme_stylebox_override("pressed", empty_style)
 	_pause_hit_target.add_theme_stylebox_override("focus", empty_style)
-	var pressed_style: StyleBoxFlat = _make_style_box(
-		Color(1.0, 1.0, 1.0, Config.HUD_PAUSE_PRESSED_ALPHA),
-		Config.HUD_PAUSE_RADIUS
-	)
-	_pause_hit_target.add_theme_stylebox_override("pressed", pressed_style)
 	_pause_hit_target.pressed.connect(_on_pause_pressed)
+	_pause_hit_target.button_down.connect(_set_pause_pressed.bind(true))
+	_pause_hit_target.button_up.connect(_set_pause_pressed.bind(false))
+	_pause_hit_target.mouse_exited.connect(_set_pause_pressed.bind(false))
 	add_child(_pause_hit_target)
+	var visual_origin: Vector2 = (
+		Config.HUD_PAUSE_HIT_TARGET_SIZE - Config.HUD_PAUSE_SIZE
+	) / 2.0
+	_pause_background = _make_pause_panel(
+		visual_origin,
+		Config.HUD_PAUSE_SIZE,
+		_pause_style
+	)
+	_pause_bars.append(_make_pause_panel(
+		visual_origin + Config.HUD_PAUSE_BAR_OFFSET_A,
+		Config.HUD_PAUSE_BAR_SIZE,
+		_pause_bar_style
+	))
+	_pause_bars.append(_make_pause_panel(
+		visual_origin + Config.HUD_PAUSE_BAR_OFFSET_B,
+		Config.HUD_PAUSE_BAR_SIZE,
+		_pause_bar_style
+	))
+	_pause_pressed_overlay = _make_pause_panel(
+		visual_origin,
+		Config.HUD_PAUSE_SIZE,
+		_pause_pressed_style
+	)
+	_pause_pressed_overlay.visible = false
+	ButtonFeedback.apply(_pause_hit_target)
+
+func _make_pause_panel(position: Vector2, panel_size: Vector2, style: StyleBoxFlat) -> Panel:
+	var panel: Panel = Panel.new()
+	panel.position = position
+	panel.size = panel_size
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_theme_stylebox_override("panel", style)
+	_pause_hit_target.add_child(panel)
+	return panel
+
+func _set_pause_pressed(pressed: bool) -> void:
+	if _pause_pressed_overlay != null:
+		_pause_pressed_overlay.visible = pressed
 
 func _draw() -> void:
-	draw_style_box(_pause_style, Rect2(Config.HUD_PAUSE_POSITION, Config.HUD_PAUSE_SIZE))
-	draw_style_box(
-		_pause_bar_style,
-		Rect2(Config.HUD_PAUSE_POSITION + Config.HUD_PAUSE_BAR_OFFSET_A, Config.HUD_PAUSE_BAR_SIZE)
-	)
-	draw_style_box(
-		_pause_bar_style,
-		Rect2(Config.HUD_PAUSE_POSITION + Config.HUD_PAUSE_BAR_OFFSET_B, Config.HUD_PAUSE_BAR_SIZE)
-	)
-
 	draw_string(
 		ThemeDB.fallback_font,
 		Vector2(Config.HUD_SCORE_AREA_X, Config.HUD_SCORE_LABEL_BASELINE),

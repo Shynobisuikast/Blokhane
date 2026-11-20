@@ -9,6 +9,8 @@ const GameOverTestRunnerScript = preload("res://tests/GameOverTestRunner.gd")
 const PieceTestRunnerScript = preload("res://tests/PieceTestRunner.gd")
 const ScreenFlowTestRunnerScript = preload("res://tests/ScreenFlowTestRunner.gd")
 const ThemeTestRunnerScript = preload("res://tests/ThemeTestRunner.gd")
+const ButtonFeedbackScript = preload("res://scripts/ButtonFeedback.gd")
+const ClearStaggerScript = preload("res://scripts/ClearStagger.gd")
 
 var _checks_total: int = 0
 var _checks_passed: int = 0
@@ -120,6 +122,86 @@ func _run_tests() -> void:
 	GameOverTestRunnerScript.run(self)
 	ScreenFlowTestRunnerScript.run(self)
 	ThemeTestRunnerScript.run(self)
+	_test_polish_constants()
+
+func _test_polish_constants() -> void:
+	var animation_times: Array[float] = [
+		Config.PRESS_TIME,
+		Config.PLACE_POP_TIME,
+		Config.CLEAR_TWEEN_TIME,
+		Config.CLEAR_STAGGER,
+		Config.SCREEN_FADE_TIME,
+		Config.SCORE_COUNT_TIME,
+		Config.RETURN_SHAKE_TIME,
+		Config.RETURN_TWEEN_TIME,
+		Config.SCORE_POP_TIME,
+		Config.COMBO_POP_TIME
+	]
+	var positive_times: bool = true
+	for animation_time: float in animation_times:
+		positive_times = positive_times and animation_time > 0.0
+	var clear_total_bound: float = (
+		Config.CLEAR_STAGGER * Config.BOARD_SIZE + Config.CLEAR_TWEEN_TIME
+	)
+	check(
+		"69 animasyon sabitleri pozitif, temizleme süresi üst sınırı aşmıyor",
+		positive_times
+		and Config.PRESS_SCALE > 0.0
+		and Config.PRESS_SCALE < 1.0
+		and Config.PLACE_POP_SCALE > 1.0
+		and Config.RETURN_SHAKE_DISTANCE > 0.0
+		and Config.RETURN_SHAKE_CYCLES > 0
+		and clear_total_bound <= Config.CLEAR_MAX_DURATION
+	)
+	check(
+		"70 ButtonFeedback basılı/bırakılmış ölçekleri doğru",
+		is_equal_approx(ButtonFeedbackScript.scale_for_pressed(true), Config.PRESS_SCALE)
+		and is_equal_approx(ButtonFeedbackScript.scale_for_pressed(false), 1.0)
+	)
+	_test_clear_stagger()
+
+func _test_clear_stagger() -> void:
+	var placed_cells: Array[Vector2i] = [Vector2i(2, 3), Vector2i(3, 3)]
+	var cleared_cells: Array[Vector2i] = [
+		Vector2i(2, 3), Vector2i(3, 3), Vector2i(5, 4)
+	]
+	var delays: Dictionary = ClearStaggerScript.calculate_delays(
+		cleared_cells,
+		placed_cells,
+		Config.CLEAR_STAGGER,
+		Config.CLEAR_TWEEN_TIME,
+		Config.CLEAR_MAX_DURATION
+	)
+	check(
+		"71 bırakılan hücreler gecikmesiz temizlenir",
+		is_equal_approx(float(delays[placed_cells[0]]), 0.0)
+		and is_equal_approx(float(delays[placed_cells[1]]), 0.0)
+	)
+	var expected_distance: int = abs(5 - 3) + abs(4 - 3)
+	check(
+		"72 uzak hücre gecikmesi Manhattan mesafesiyle hesaplanır",
+		is_equal_approx(
+			float(delays[Vector2i(5, 4)]),
+			float(expected_distance) * Config.CLEAR_STAGGER
+		)
+	)
+
+	var farthest_cell: Vector2i = Vector2i(Config.BOARD_SIZE - 1, Config.BOARD_SIZE - 1)
+	var farthest_delays: Dictionary = ClearStaggerScript.calculate_delays(
+		[farthest_cell],
+		[Vector2i.ZERO],
+		Config.CLEAR_STAGGER,
+		Config.CLEAR_TWEEN_TIME,
+		Config.CLEAR_MAX_DURATION
+	)
+	var total_clear_time: float = (
+		Config.CLEAR_TWEEN_TIME
+		+ ClearStaggerScript.maximum_delay(farthest_delays)
+	)
+	check(
+		"73 en büyük gecikme temizleme üst sınırını aşmaz",
+		total_clear_time <= Config.CLEAR_MAX_DURATION
+	)
 
 func check(test_name: String, condition: bool) -> void:
 	_checks_total += 1

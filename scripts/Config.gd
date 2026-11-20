@@ -7,6 +7,16 @@ const CELL_SIZE: int = 48
 const GAP: int = 4
 const SCREEN_SIZE: Vector2i = Vector2i(480, 860)
 
+const PRESS_SCALE: float = 0.97
+const PRESS_TIME: float = 0.06
+const PLACE_POP_TIME: float = 0.12
+const PLACE_POP_SCALE: float = 1.08
+const SCREEN_FADE_TIME: float = 0.15
+const SCORE_COUNT_TIME: float = 0.5
+const RETURN_SHAKE_DISTANCE: float = 4.0
+const RETURN_SHAKE_CYCLES: int = 2
+const RETURN_SHAKE_TIME: float = 0.15
+
 
 const PANEL_RADIUS: int = 22
 const CELL_RADIUS: int = 7
@@ -88,6 +98,8 @@ const LINE_BONUS: int = 10
 const COMBO_STEP: float = 0.5
 const COMBO_MAX: float = 3.0
 const CLEAR_TWEEN_TIME: float = 0.25
+const CLEAR_STAGGER: float = 0.02
+const CLEAR_MAX_DURATION: float = 0.45
 const SCORE_POP_TIME: float = 0.12
 const SCORE_POP_SCALE: float = 1.15
 const COMBO_POP_TIME: float = 0.12
@@ -128,6 +140,7 @@ const GAME_OVER_MENU_FONT_SIZE: int = 18
 
 const HUD_PAUSE_POSITION: Vector2 = Vector2(22, 60.5)
 const HUD_PAUSE_SIZE: Vector2 = Vector2(48, 48)
+const HUD_PAUSE_HIT_TARGET_SIZE: Vector2 = Vector2(50, 50)
 const HUD_PAUSE_RADIUS: int = 14
 const HUD_PAUSE_BAR_SIZE: Vector2 = Vector2(6, 20)
 const HUD_PAUSE_BAR_RADIUS: int = 3

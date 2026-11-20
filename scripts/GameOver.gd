@@ -6,7 +6,8 @@ signal restart_requested
 signal menu_requested
 
 var _final_score: int = 0
-
+var _display_score: int = 0
+var _score_tween: Tween
 var _is_new_best: bool = false
 var _restart_button: Button
 var _menu_button: Button
@@ -26,10 +27,20 @@ func _apply_theme() -> void:
 	_set_button_theme(_menu_button, ThemeAccess.color("PANEL"), ThemeAccess.color("TEXT"), Config.GAME_OVER_MENU_RADIUS)
 
 func show_result(final_score: int, is_new_best: bool) -> void:
+	if _score_tween != null and _score_tween.is_running():
+		_score_tween.kill()
 	_final_score = final_score
+	_display_score = 0
 	_is_new_best = is_new_best
 	visible = true
 	queue_redraw()
+	_score_tween = create_tween()
+	_score_tween.tween_method(
+		_set_display_score,
+		0.0,
+		float(_final_score),
+		Config.SCORE_COUNT_TIME
+	)
 
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, Config.SCREEN_SIZE), ThemeAccess.color("BG"))
@@ -69,7 +80,7 @@ func _draw() -> void:
 	draw_string(
 		ThemeDB.fallback_font,
 		Config.GAME_OVER_SCORE_VALUE_POSITION,
-		str(_final_score),
+		str(_display_score),
 		HORIZONTAL_ALIGNMENT_CENTER,
 		Config.GAME_OVER_SCORE_VALUE_SIZE.x,
 		Config.GAME_OVER_SCORE_FONT_SIZE,
@@ -132,6 +143,7 @@ func _make_button(
 	button.add_theme_stylebox_override("pressed", _make_style_box(fill, radius))
 	button.add_theme_stylebox_override("focus", _make_style_box(fill, radius))
 	add_child(button)
+	ButtonFeedback.apply(button)
 	return button
 
 func _set_button_theme(button: Button, fill: Color, text_color: Color, radius: int) -> void:
@@ -161,7 +173,13 @@ func _make_style_box(fill: Color, radius: int) -> StyleBoxFlat:
 	style.set_corner_radius_all(radius)
 	return style
 
+func _set_display_score(value: float) -> void:
+	_display_score = roundi(value)
+	queue_redraw()
+
 func _on_restart_pressed() -> void:
+	if _score_tween != null and _score_tween.is_running():
+		_score_tween.kill()
 	restart_requested.emit()
 
 func _on_menu_pressed() -> void:

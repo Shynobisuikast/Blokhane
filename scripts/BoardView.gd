@@ -3,6 +3,7 @@ class_name BoardView
 extends Control
 
 const CellDrawingScript = preload("res://scripts/CellDrawing.gd")
+const ClearStaggerScript = preload("res://scripts/ClearStagger.gd")
 
 var model: BoardModel
 var _panel_style: StyleBoxFlat
@@ -15,8 +16,13 @@ var _preview_cells: Array[Vector2i] = []
 var _preview_color_id: int = 0
 var _preview_rows: Array[int] = []
 var _preview_columns: Array[int] = []
+var _place_cells: Dictionary = {}
+var _place_progress: float = 1.0
 var _clear_cells: Dictionary = {}
-var _clear_progress: float = 1.0
+var _clear_duration: float = Config.CLEAR_TWEEN_TIME
+var _clear_delays: Dictionary = {}
+var _animation_elapsed: float = 0.0
+var _animation_tween: Tween
 
 func _ready() -> void:
 	ThemeAccess.connect_changed(_on_theme_changed)
@@ -72,22 +78,84 @@ func clear_preview() -> void:
 	_preview_columns.clear()
 	queue_redraw()
 
-func play_clear(cells: Dictionary, duration: float) -> void:
+func play_place(shape: Array[Vector2i], origin: Vector2i, color_id: int) -> void:
+	_cancel_visual_animation()
+	for offset: Vector2i in shape:
+		_place_cells[origin + offset] = color_id
+	_place_progress = 0.0
+	queue_redraw()
+	_start_visual_animation(Config.PLACE_POP_TIME)
+
+func play_clear(
+	cells: Dictionary,
+	duration: float,
+	placed_cells: Array[Vector2i]
+) -> void:
 	if cells.is_empty():
 		return
+	if _animation_tween != null and _animation_tween.is_running():
+		_animation_tween.kill()
+	_animation_tween = null
 	_clear_cells = cells.duplicate()
-	_clear_progress = 0.0
+	for cell: Vector2i in _clear_cells:
+		_place_cells.erase(cell)
+	_clear_duration = duration
+	var cleared_cell_list: Array[Vector2i] = []
+	for cell: Vector2i in _clear_cells:
+		cleared_cell_list.append(cell)
+	_clear_delays = ClearStaggerScript.calculate_delays(
+		cleared_cell_list,
+		placed_cells,
+		Config.CLEAR_STAGGER,
+		duration,
+		Config.CLEAR_MAX_DURATION
+	)
+	_animation_elapsed = 0.0
 	queue_redraw()
-	var tween: Tween = create_tween()
-	tween.tween_method(_set_clear_progress, 0.0, 1.0, duration)
+	var total_duration: float = duration + ClearStaggerScript.maximum_delay(_clear_delays)
+	var tween: Tween = _start_visual_animation(total_duration)
 	await tween.finished
+
+func _start_visual_animation(duration: float) -> Tween:
+	_animation_tween = create_tween()
+	_animation_tween.tween_method(_set_animation_elapsed, 0.0, duration, duration)
+	_animation_tween.finished.connect(_finish_visual_animation, CONNECT_ONE_SHOT)
+	return _animation_tween
+
+func _cancel_visual_animation() -> void:
+	if _animation_tween != null and _animation_tween.is_running():
+		_animation_tween.kill()
+	_animation_tween = null
+	_place_cells.clear()
 	_clear_cells.clear()
-	_clear_progress = 1.0
+	_clear_delays.clear()
+	_animation_elapsed = 0.0
+	_place_progress = 1.0
 	queue_redraw()
 
-func _set_clear_progress(progress: float) -> void:
-	_clear_progress = progress
+func _set_animation_elapsed(elapsed: float) -> void:
+	_animation_elapsed = elapsed
+	if not _place_cells.is_empty():
+		_place_progress = clampf(elapsed / Config.PLACE_POP_TIME, 0.0, 1.0)
 	queue_redraw()
+
+func _finish_visual_animation() -> void:
+	_animation_tween = null
+	_place_cells.clear()
+	_clear_cells.clear()
+	_clear_delays.clear()
+	_animation_elapsed = 0.0
+	_place_progress = 1.0
+	queue_redraw()
+
+func _clear_progress_for_cell(cell: Vector2i) -> float:
+	var delay: float = float(_clear_delays.get(cell, 0.0))
+	return clampf((_animation_elapsed - delay) / _clear_duration, 0.0, 1.0)
+
+func _place_scale() -> float:
+	if _place_progress <= 0.5:
+		return lerpf(1.0, Config.PLACE_POP_SCALE, _place_progress * 2.0)
+	return lerpf(Config.PLACE_POP_SCALE, 1.0, (_place_progress - 0.5) * 2.0)
 
 func cell_to_local(cell: Vector2i) -> Vector2:
 	return _grid_origin() + Vector2(
@@ -132,12 +200,19 @@ func _draw() -> void:
 				draw_style_box(_style_for_color(color_id), cell_rect)
 				CellDrawingScript.draw_filled_cell_bevel(self, cell_rect, Config.CELL_RADIUS)
 
+	_draw_place_cells()
+
 	for cell: Vector2i in _clear_cells:
 		var cell_rect: Rect2 = Rect2(
 			cell_to_local(cell),
 			Vector2(Config.CELL_SIZE, Config.CELL_SIZE)
 		)
-		CellDrawingScript.draw_clear_cell(self, cell_rect, _clear_cells[cell], _clear_progress)
+		CellDrawingScript.draw_clear_cell(
+			self,
+			cell_rect,
+			_clear_cells[cell],
+			_clear_progress_for_cell(cell)
+		)
 
 	for cell: Vector2i in _preview_cells:
 		var shadow_rect: Rect2 = Rect2(
@@ -163,6 +238,25 @@ func _draw() -> void:
 					Vector2(Config.CELL_SIZE, Config.CELL_SIZE)
 				)
 				draw_style_box(_highlight_style, highlight_rect)
+
+func _draw_place_cells() -> void:
+	if _place_cells.is_empty():
+		return
+	var scale: float = _place_scale()
+	var cell_size: Vector2 = Vector2.ONE * Config.CELL_SIZE * scale
+	for cell: Vector2i in _place_cells:
+		var full_size: Vector2 = Vector2.ONE * Config.CELL_SIZE
+		var cell_rect: Rect2 = Rect2(
+			cell_to_local(cell) + (full_size - cell_size) / 2.0,
+			cell_size
+		)
+		var color_id: int = _place_cells[cell]
+		draw_style_box(_style_for_color(color_id), cell_rect)
+		CellDrawingScript.draw_filled_cell_bevel(
+			self,
+			cell_rect,
+			Config.CELL_RADIUS * scale
+		)
 
 func _style_for_ghost_color(color_id: int) -> StyleBoxFlat:
 	if not _ghost_styles.has(color_id):

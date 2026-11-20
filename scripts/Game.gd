@@ -29,6 +29,7 @@ var _preview_origin: Vector2i = Vector2i.ZERO
 var _has_preview_origin: bool = false
 var _touch_contact_active: bool = false
 var _drag_started_touch: bool = false
+var _return_tween: Tween
 
 func _ready() -> void:
 	Input.emulate_mouse_from_touch = true
@@ -137,17 +138,22 @@ func _drop_piece(pointer: Vector2) -> void:
 	var origin: Vector2i = DragMath.snap_origin(board_top_left, _board_view)
 	var color_id: int = _dragged_piece["color_id"]
 	if not _board_model.place(shape, origin, color_id):
+		_tray.play_return_shake(_dragged_slot)
 		_begin_return()
 		return
 
-	var placed_cells: int = shape.size()
+	var placed_cells: Array[Vector2i] = []
+	for offset: Vector2i in shape:
+		placed_cells.append(origin + offset)
+	_board_view.play_place(shape, origin, color_id)
+	var placed_cell_count: int = shape.size()
 	var lines: Dictionary = _board_model.find_full_lines()
 	var line_count: int = lines["rows"].size() + lines["cols"].size()
 	var cleared_cells: Dictionary = {}
 	if line_count > 0:
 		cleared_cells = _clear_flow.capture_and_clear(_board_model, lines)
 
-	var score_result: Dictionary = _session.score_model.register_turn(placed_cells, line_count)
+	var score_result: Dictionary = _session.score_model.register_turn(placed_cell_count, line_count)
 
 	var gain: int = score_result["gain"]
 	var multiplier: float = score_result["multiplier"]
@@ -165,10 +171,10 @@ func _drop_piece(pointer: Vector2) -> void:
 	_clear_drag_state()
 	if line_count > 0:
 		_drag_state = DragState.CLEARING
-	piece_placed.emit(placed_cells)
+	piece_placed.emit(placed_cell_count)
 	if line_count > 0:
 		lines_cleared.emit(line_count, gain, multiplier)
-		await _board_view.play_clear(cleared_cells, Config.CLEAR_TWEEN_TIME)
+		await _board_view.play_clear(cleared_cells, Config.CLEAR_TWEEN_TIME, placed_cells)
 		_drag_state = DragState.IDLE
 	if _session.refill_if_empty():
 		triplet_refilled.emit()
@@ -183,12 +189,14 @@ func _begin_return() -> void:
 	_board_view.clear_preview()
 	_drag_state = DragState.RETURNING
 	var target: Vector2 = _convert_position(_tray, _drag_layer, _tray.piece_cell_origin(_dragged_slot))
-	var tween: Tween = create_tween().set_parallel(true)
-	tween.tween_method(_drag_layer.set_top_left, _drag_layer.top_left, target, Config.RETURN_TWEEN_TIME)
-	tween.tween_method(_drag_layer.set_cell_size, Config.CELL_SIZE, Config.TRAY_CELL, Config.RETURN_TWEEN_TIME)
-	tween.tween_method(_drag_layer.set_gap, Config.GAP, Config.TRAY_GAP, Config.RETURN_TWEEN_TIME)
-	tween.tween_method(_drag_layer.set_corner_radius, Config.CELL_RADIUS, Config.TRAY_CELL_RADIUS, Config.RETURN_TWEEN_TIME)
-	tween.finished.connect(_finish_return.bind(_dragged_slot), CONNECT_ONE_SHOT)
+	if _return_tween != null and _return_tween.is_running():
+		_return_tween.kill()
+	_return_tween = create_tween().set_parallel(true)
+	_return_tween.tween_method(_drag_layer.set_top_left, _drag_layer.top_left, target, Config.RETURN_TWEEN_TIME)
+	_return_tween.tween_method(_drag_layer.set_cell_size, Config.CELL_SIZE, Config.TRAY_CELL, Config.RETURN_TWEEN_TIME)
+	_return_tween.tween_method(_drag_layer.set_gap, Config.GAP, Config.TRAY_GAP, Config.RETURN_TWEEN_TIME)
+	_return_tween.tween_method(_drag_layer.set_corner_radius, Config.CELL_RADIUS, Config.TRAY_CELL_RADIUS, Config.RETURN_TWEEN_TIME)
+	_return_tween.finished.connect(_finish_return.bind(_dragged_slot), CONNECT_ONE_SHOT)
 
 func _finish_return(slot: int) -> void:
 	if _drag_state != DragState.RETURNING or slot != _dragged_slot:

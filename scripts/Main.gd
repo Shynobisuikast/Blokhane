@@ -15,6 +15,7 @@ const ScreenFlowScript = preload("res://scripts/ScreenFlow.gd")
 @onready var settings: Settings = $Settings
 
 var _flow: ScreenFlow = ScreenFlowScript.new()
+var _screen_fade_tween: Tween
 
 func _ready() -> void:
 	background.color = ThemeAccess.color("BG")
@@ -96,9 +97,40 @@ func _show_screen(screen: ScreenFlow.Screen) -> void:
 	game.visible = gameplay_visible
 	hud.visible = gameplay_visible
 	drag_layer.visible = gameplay_visible
-	game_over.visible = screen == ScreenFlow.Screen.GAME_OVER
-	pause_screen.visible = screen == ScreenFlow.Screen.PAUSED
-	menu.visible = screen == ScreenFlow.Screen.MENU
-	settings.visible = screen == ScreenFlow.Screen.SETTINGS
+	_stop_screen_fade()
+	var overlay_screens: Array[Control] = [game_over, pause_screen, menu, settings]
+	for overlay_screen: Control in overlay_screens:
+		overlay_screen.visible = false
+		overlay_screen.modulate.a = 1.0
+
+	var opening_screen: Control
+	match screen:
+		ScreenFlow.Screen.GAME_OVER:
+			opening_screen = game_over
+		ScreenFlow.Screen.PAUSED:
+			opening_screen = pause_screen
+		ScreenFlow.Screen.MENU:
+			opening_screen = menu
+		ScreenFlow.Screen.SETTINGS:
+			opening_screen = settings
+	if opening_screen != null:
+		opening_screen.visible = true
+		_fade_in_screen(opening_screen)
 	if screen == ScreenFlow.Screen.MENU:
 		menu.refresh_best()
+
+func _fade_in_screen(screen: Control) -> void:
+	screen.modulate.a = 0.0
+	_screen_fade_tween = create_tween()
+	_screen_fade_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	_screen_fade_tween.tween_property(
+		screen,
+		"modulate:a",
+		1.0,
+		Config.SCREEN_FADE_TIME
+	)
+
+func _stop_screen_fade() -> void:
+	if _screen_fade_tween != null and _screen_fade_tween.is_running():
+		_screen_fade_tween.kill()
+	_screen_fade_tween = null

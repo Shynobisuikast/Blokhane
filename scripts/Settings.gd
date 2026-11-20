@@ -91,6 +91,7 @@ func _make_button(
 	button.mouse_filter = Control.MOUSE_FILTER_STOP
 	button.add_theme_font_size_override("font_size", font_size)
 	add_child(button)
+	ButtonFeedback.apply(button)
 	return button
 
 func _on_theme_changed() -> void:

@@ -6,6 +6,9 @@ var pieces: Array = []
 var _hidden_slots: Array[bool] = []
 var _panel_style: StyleBoxFlat
 var _piece_styles: Dictionary = {}
+var _shake_tween: Tween
+var _shaking_slot: int = -1
+var _shake_offset: float = 0.0
 
 func _ready() -> void:
 	ThemeAccess.connect_changed(_on_theme_changed)
@@ -43,6 +46,37 @@ func set_slot_hidden(slot: int, should_hide: bool) -> void:
 	_hidden_slots[slot] = should_hide
 	queue_redraw()
 
+func play_return_shake(slot: int) -> void:
+	if slot < 0 or slot >= Config.TRAY_SLOTS:
+		return
+	if _shake_tween != null and _shake_tween.is_running():
+		_shake_tween.kill()
+	_shaking_slot = slot
+	_shake_offset = 0.0
+	_shake_tween = create_tween()
+	_shake_tween.tween_method(
+		_set_shake_progress.bind(slot),
+		0.0,
+		1.0,
+		Config.RETURN_SHAKE_TIME
+	)
+	_shake_tween.finished.connect(_finish_return_shake.bind(slot), CONNECT_ONE_SHOT)
+
+func _set_shake_progress(progress: float, slot: int) -> void:
+	if slot != _shaking_slot:
+		return
+	var phase: float = progress * Config.RETURN_SHAKE_CYCLES * TAU
+	_shake_offset = sin(phase) * Config.RETURN_SHAKE_DISTANCE
+	queue_redraw()
+
+func _finish_return_shake(slot: int) -> void:
+	if slot != _shaking_slot:
+		return
+	_shaking_slot = -1
+	_shake_offset = 0.0
+	_shake_tween = null
+	queue_redraw()
+
 func slot_at(pos: Vector2) -> int:
 	for slot: int in range(Config.TRAY_SLOTS):
 		if slot_rect(slot).has_point(pos):
@@ -71,13 +105,20 @@ func piece_cell_origin(slot: int) -> Vector2:
 
 func _draw() -> void:
 	for slot: int in range(Config.TRAY_SLOTS):
-		draw_style_box(_panel_style, slot_rect(slot))
+		var card_rect: Rect2 = slot_rect(slot)
+		card_rect.position += _slot_draw_offset(slot)
+		draw_style_box(_panel_style, card_rect)
 		if slot < pieces.size() and pieces[slot] != null and not _hidden_slots[slot]:
 			_draw_piece(slot, pieces[slot] as Dictionary)
 
+func _slot_draw_offset(slot: int) -> Vector2:
+	if slot != _shaking_slot:
+		return Vector2.ZERO
+	return Vector2(_shake_offset, 0.0)
+
 func _draw_piece(slot: int, piece: Dictionary) -> void:
 	var shape: Array[Vector2i] = piece["shape"]
-	var origin: Vector2 = piece_cell_origin(slot)
+	var origin: Vector2 = piece_cell_origin(slot) + _slot_draw_offset(slot)
 	var color_id: int = piece["color_id"]
 	for cell: Vector2i in shape:
 		var cell_position: Vector2 = origin + Vector2(
