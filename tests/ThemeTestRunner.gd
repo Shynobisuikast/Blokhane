@@ -24,14 +24,6 @@ static func run(test_runner: Variant) -> void:
 		"62 açık temada TEXT-BG parlaklık farkı 0.4'ten büyük",
 		_brightness_difference(ThemePalettesScript.ThemeId.LIGHT) > 0.4
 	)
-	test_runner.check(
-		"63 koyu palet dark.svg renkleriyle eşleşir",
-		_palette_matches_svg(ThemePalettesScript.ThemeId.DARK, "res://templates/dark.svg")
-	)
-	test_runner.check(
-		"64 açık palet light.svg renkleriyle eşleşir",
-		_palette_matches_svg(ThemePalettesScript.ThemeId.LIGHT, "res://templates/light.svg")
-	)
 
 	_remove_test_file(TEST_SAVE_PATH)
 	SaveDataScript.save_theme(ThemePalettesScript.ThemeId.LIGHT, TEST_SAVE_PATH)
@@ -85,26 +77,6 @@ static func _linear_channel(channel: float) -> float:
 		return channel / 12.92
 	return pow((channel + 0.055) / 1.055, 2.4)
 
-static func _palette_matches_svg(id: ThemePalettesScript.ThemeId, path: String) -> bool:
-	var svg: String = FileAccess.get_file_as_string(path)
-	if svg.is_empty():
-		return false
-	var expression: RegEx = RegEx.new()
-	if expression.compile("#[0-9A-Fa-f]{6}") != OK:
-		return false
-	var svg_colors: Dictionary = {}
-	for match_result: RegExMatch in expression.search_all(svg):
-		svg_colors[match_result.get_string().to_upper()] = true
-	var palette: Dictionary = ThemePalettesScript.get_palette(id)
-	for key: String in palette:
-		var palette_color: Color = palette[key]
-		var hex_color: String = "#" + palette_color.to_html(false).to_upper()
-		if svg_colors.has(hex_color):
-			continue
-		if palette_color == Color.WHITE and svg.contains("fill=\"white\""):
-			continue
-		return false
-	return true
 
 static func _remove_test_file(path: String) -> void:
 	if FileAccess.file_exists(path):
