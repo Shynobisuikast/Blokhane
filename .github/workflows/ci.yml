@@ -1,0 +1,21 @@
+name: Smoke tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-tests:
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.7.2
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import project resources
+        run: godot --headless --editor --path . --quit
+      - name: Godot headless smoke tests
+        run: godot --headless --path . --script res://tests/smoke_test.gd

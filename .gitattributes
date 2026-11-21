@@ -1,2 +1,9 @@
-# Normalize EOL for all files that Git considers text files.
+# Metin dosyalarını LF satır sonuna normalize et.
 * text=auto eol=lf
+*.svg text eol=lf
+
+# İkili varlıklar
+*.wav binary
+*.ogg binary
+*.png binary
+*.pck binary
