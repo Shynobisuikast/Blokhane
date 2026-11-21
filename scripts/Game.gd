@@ -61,6 +61,9 @@ func restart() -> void:
 	_session.restart()
 	_clear_drag_state()
 
+func combo_streak() -> int:
+	return int(_session.score_model.streak)
+
 func cancel_drag() -> void:
 	if _drag_state == DragState.DRAGGING:
 		_tray.set_slot_hidden(_dragged_slot, false)
@@ -100,6 +103,7 @@ func _begin_drag(pointer: Vector2) -> void:
 	_dragged_piece = (_tray.pieces[slot] as Dictionary).duplicate(true)
 	_drag_started_touch = _touch_contact_active
 	_drag_state = DragState.DRAGGING
+	Audio.play_sfx(Config.SoundId.PICK)
 	_has_preview_origin = false
 	_tray.set_slot_hidden(slot, true)
 	_drag_layer.show_piece(_dragged_piece, Vector2.ZERO)
@@ -188,6 +192,7 @@ func _begin_return() -> void:
 		return
 	_board_view.clear_preview()
 	_drag_state = DragState.RETURNING
+	Audio.play_sfx(Config.SoundId.INVALID)
 	var target: Vector2 = _convert_position(_tray, _drag_layer, _tray.piece_cell_origin(_dragged_slot))
 	if _return_tween != null and _return_tween.is_running():
 		_return_tween.kill()

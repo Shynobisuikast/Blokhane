@@ -15,10 +15,19 @@ static func apply(control: Control) -> void:
 		var button: BaseButton = control as BaseButton
 		button.button_down.connect(_on_button_down.bind(control))
 		button.button_up.connect(_on_interaction_ended.bind(control))
+		button.pressed.connect(_on_button_pressed)
 	control.mouse_exited.connect(_on_interaction_ended.bind(control))
 
 static func scale_for_pressed(pressed: bool) -> float:
 	return Config.PRESS_SCALE if pressed else 1.0
+
+static func _on_button_pressed() -> void:
+	var main_loop: MainLoop = Engine.get_main_loop()
+	if not main_loop is SceneTree:
+		return
+	var audio: Node = (main_loop as SceneTree).root.get_node_or_null("Audio")
+	if audio != null:
+		audio.call("play_sfx", Config.SoundId.BUTTON)
 
 static func _on_button_down(control: Control) -> void:
 	_animate_scale(control, scale_for_pressed(true))

@@ -24,6 +24,9 @@ func _ready() -> void:
 	game.configure(board_view, tray, drag_layer, hud, game_over)
 	game_over.restart_requested.connect(_on_restart_requested)
 	game_over.menu_requested.connect(_on_menu_requested)
+	game.piece_placed.connect(_on_piece_placed)
+	game.lines_cleared.connect(_on_lines_cleared)
+	game.triplet_refilled.connect(_on_triplet_refilled)
 	game.game_over.connect(_on_game_over)
 	hud.pause_requested.connect(_on_pause_requested)
 	pause_screen.resume_requested.connect(_on_resume_requested)
@@ -80,11 +83,26 @@ func _on_restart_requested() -> void:
 	game.restart()
 	_show_screen(ScreenFlow.Screen.PLAYING)
 
-func _on_game_over(_final_score: int, _is_new_best: bool) -> void:
+func _on_piece_placed(_cells: int) -> void:
+	Audio.play_sfx(Config.SoundId.PLACE)
+
+func _on_lines_cleared(count: int, _gain: int, _multiplier: float) -> void:
+	Audio.play_clear(count, game.combo_streak())
+
+func _on_triplet_refilled() -> void:
+	Audio.play_sfx(Config.SoundId.TRAY_REFILL)
+
+func _on_game_over(_final_score: int, is_new_best: bool) -> void:
+	Audio.play_game_over(is_new_best)
 	if _flow.go(ScreenFlow.Screen.GAME_OVER):
 		_show_screen(ScreenFlow.Screen.GAME_OVER)
 
 func _show_screen(screen: ScreenFlow.Screen) -> void:
+	Audio.set_menu_context(
+		screen == ScreenFlow.Screen.MENU or screen == ScreenFlow.Screen.SETTINGS
+	)
+	Audio.set_paused(screen == ScreenFlow.Screen.PAUSED)
+	Audio.set_game_over(screen == ScreenFlow.Screen.GAME_OVER)
 	if screen != ScreenFlow.Screen.SETTINGS:
 		settings.cancel_pending_confirmation()
 	var gameplay_visible: bool = (

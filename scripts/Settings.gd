@@ -11,6 +11,8 @@ enum ResetPhase { IDLE, CONFIRM, DONE }
 
 var _dark_button: Button
 var _light_button: Button
+var _music_button: Button
+var _sfx_button: Button
 var _reset_button: Button
 var _back_button: Button
 var _reset_timer: Timer
@@ -62,6 +64,20 @@ func _build_buttons() -> void:
 		Config.SETTINGS_THEME_OPTION_FONT_SIZE
 	)
 	_light_button.pressed.connect(_on_light_pressed)
+	_music_button = _make_button(
+		"Müzik: Açık",
+		Config.SETTINGS_MUSIC_POSITION,
+		Config.SETTINGS_AUDIO_BUTTON_SIZE,
+		Config.SETTINGS_AUDIO_BUTTON_FONT_SIZE
+	)
+	_music_button.pressed.connect(_on_music_pressed)
+	_sfx_button = _make_button(
+		"Efektler: Açık",
+		Config.SETTINGS_SFX_POSITION,
+		Config.SETTINGS_AUDIO_BUTTON_SIZE,
+		Config.SETTINGS_AUDIO_BUTTON_FONT_SIZE
+	)
+	_sfx_button.pressed.connect(_on_sfx_pressed)
 	_reset_button = _make_button(
 		"Verileri sıfırla",
 		Config.SETTINGS_RESET_POSITION,
@@ -110,6 +126,16 @@ func _apply_theme() -> void:
 		selected_id == ThemePalettes.ThemeId.LIGHT,
 		Config.SETTINGS_THEME_OPTION_RADIUS
 	)
+	var music_enabled: bool = Audio.is_music_enabled()
+	var sfx_enabled: bool = Audio.is_sfx_enabled()
+	_music_button.text = "Müzik: Açık" if music_enabled else "Müzik: Kapalı"
+	_sfx_button.text = "Efektler: Açık" if sfx_enabled else "Efektler: Kapalı"
+	_set_button_theme(
+		_music_button, music_enabled, Config.SETTINGS_AUDIO_BUTTON_RADIUS
+	)
+	_set_button_theme(
+		_sfx_button, sfx_enabled, Config.SETTINGS_AUDIO_BUTTON_RADIUS
+	)
 	_set_button_theme(_reset_button, false, Config.SETTINGS_RESET_RADIUS)
 	_set_button_theme(_back_button, false, Config.SETTINGS_BACK_RADIUS)
 
@@ -130,6 +156,14 @@ func _set_button_theme(button: Button, selected: bool, radius: int) -> void:
 	button.add_theme_stylebox_override("pressed", style)
 	button.add_theme_stylebox_override("focus", style)
 
+func _on_music_pressed() -> void:
+	Audio.set_music_enabled(not Audio.is_music_enabled())
+	_apply_theme()
+
+func _on_sfx_pressed() -> void:
+	Audio.set_sfx_enabled(not Audio.is_sfx_enabled())
+	_apply_theme()
+
 func _on_dark_pressed() -> void:
 	ThemeAccess.set_theme(ThemePalettes.ThemeId.DARK)
 
@@ -144,7 +178,7 @@ func _on_reset_pressed() -> void:
 			_reset_timer.start(Config.SETTINGS_RESET_CONFIRM_SECONDS)
 		ResetPhase.CONFIRM:
 			_reset_timer.stop()
-			SaveDataScript.save_best(0)
+			SaveDataScript.reset_best()
 			_reset_phase = ResetPhase.DONE
 			_reset_button.text = "Sıfırlandı"
 			_reset_timer.start(Config.SETTINGS_RESET_DONE_SECONDS)

@@ -9,6 +9,7 @@ const GameOverTestRunnerScript = preload("res://tests/GameOverTestRunner.gd")
 const PieceTestRunnerScript = preload("res://tests/PieceTestRunner.gd")
 const ScreenFlowTestRunnerScript = preload("res://tests/ScreenFlowTestRunner.gd")
 const ThemeTestRunnerScript = preload("res://tests/ThemeTestRunner.gd")
+const AudioTestRunnerScript = preload("res://tests/AudioTestRunner.gd")
 const ButtonFeedbackScript = preload("res://scripts/ButtonFeedback.gd")
 const ClearStaggerScript = preload("res://scripts/ClearStagger.gd")
 
@@ -18,9 +19,16 @@ var _board: Variant
 var _single_cell: Array[Vector2i] = [Vector2i.ZERO]
 
 func _init() -> void:
+	call_deferred("_run_smoke_tests")
+
+func _run_smoke_tests() -> void:
+	await process_frame
 	_board = BoardModelScript.new()
 	_run_tests()
 	print("TOPLAM: %d/%d geçti" % [_checks_passed, _checks_total])
+	var audio_manager: Node = root.get_node_or_null("Audio")
+	if audio_manager != null:
+		audio_manager.free()
 	quit(0 if _checks_passed == _checks_total else 1)
 
 func _run_tests() -> void:
@@ -122,6 +130,7 @@ func _run_tests() -> void:
 	GameOverTestRunnerScript.run(self)
 	ScreenFlowTestRunnerScript.run(self)
 	ThemeTestRunnerScript.run(self)
+	AudioTestRunnerScript.run(self)
 	_test_polish_constants()
 
 func _test_polish_constants() -> void:

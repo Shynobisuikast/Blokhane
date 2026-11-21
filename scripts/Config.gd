@@ -77,13 +77,18 @@ const SETTINGS_LIGHT_POSITION: Vector2 = Vector2(245, 278)
 const SETTINGS_THEME_OPTION_SIZE: Vector2 = Vector2(165, 60)
 const SETTINGS_THEME_OPTION_RADIUS: int = 18
 const SETTINGS_THEME_OPTION_FONT_SIZE: int = 20
-const SETTINGS_RESET_POSITION: Vector2 = Vector2(70, 370)
+const SETTINGS_MUSIC_POSITION: Vector2 = Vector2(70, 370)
+const SETTINGS_SFX_POSITION: Vector2 = Vector2(70, 452)
+const SETTINGS_AUDIO_BUTTON_SIZE: Vector2 = Vector2(340, 60)
+const SETTINGS_AUDIO_BUTTON_RADIUS: int = 18
+const SETTINGS_AUDIO_BUTTON_FONT_SIZE: int = 18
+const SETTINGS_RESET_POSITION: Vector2 = Vector2(70, 534)
 const SETTINGS_RESET_SIZE: Vector2 = Vector2(340, 60)
 const SETTINGS_RESET_RADIUS: int = 18
 const SETTINGS_RESET_FONT_SIZE: int = 20
 const SETTINGS_RESET_CONFIRM_SECONDS: float = 3.0
 const SETTINGS_RESET_DONE_SECONDS: float = 2.0
-const SETTINGS_BACK_POSITION: Vector2 = Vector2(70, 452)
+const SETTINGS_BACK_POSITION: Vector2 = Vector2(70, 616)
 const SETTINGS_BACK_SIZE: Vector2 = Vector2(340, 60)
 const SETTINGS_BACK_RADIUS: int = 18
 const SETTINGS_BACK_FONT_SIZE: int = 20
@@ -97,6 +102,8 @@ const LINE_HIGHLIGHT: Color = Color(1.0, 1.0, 1.0, 0.18)
 const LINE_BONUS: int = 10
 const COMBO_STEP: float = 0.5
 const COMBO_MAX: float = 3.0
+const COMBO_PITCH_STEP: float = 0.06
+const COMBO_PITCH_MAX: float = 1.5
 const CLEAR_TWEEN_TIME: float = 0.25
 const CLEAR_STAGGER: float = 0.02
 const CLEAR_MAX_DURATION: float = 0.45
@@ -106,6 +113,40 @@ const COMBO_POP_TIME: float = 0.12
 const COMBO_POP_START_SCALE: float = 0.9
 
 const COMBO_FONT_SIZE: int = 18
+const SOUND_DIR: String = "res://sounds/"
+
+enum SoundId { PICK, PLACE, INVALID, CLEAR, TRAY_REFILL, NEW_BEST, GAME_OVER, BUTTON }
+enum MusicTrack { MAIN, MENU }
+
+const SOUND_PATHS: Dictionary = {
+	SoundId.PICK: SOUND_DIR + "sfx_pick.wav",
+	SoundId.PLACE: SOUND_DIR + "sfx_place.wav",
+	SoundId.INVALID: SOUND_DIR + "sfx_invalid.wav",
+	SoundId.CLEAR: SOUND_DIR + "sfx_clear.wav",
+	SoundId.TRAY_REFILL: SOUND_DIR + "sfx_tray_refill.wav",
+	SoundId.NEW_BEST: SOUND_DIR + "sfx_new_best.wav",
+	SoundId.GAME_OVER: SOUND_DIR + "sfx_game_over.wav",
+	SoundId.BUTTON: SOUND_DIR + "sfx_button.wav"
+}
+const MUSIC_PATHS: Dictionary = {
+	MusicTrack.MAIN: SOUND_DIR + "music_main.wav",
+	MusicTrack.MENU: SOUND_DIR + "music_menu.wav"
+}
+const MUSIC_DB: float = -10.0
+const SFX_DB: float = -4.0
+const MUSIC_PAUSE_DB: float = -12.0
+const SFX_PLAYER_COUNT: int = 6
+const MUSIC_CROSSFADE_SECONDS: float = 0.5
+const MUSIC_CROSSFADE_HALF_SECONDS: float = MUSIC_CROSSFADE_SECONDS / 2.0
+const MUSIC_SILENCE_DB: float = -80.0
+const MUSIC_UNITY_DB: float = 0.0
+const MUSIC_BUS_NAME: StringName = &"Music"
+const SFX_BUS_NAME: StringName = &"SFX"
+const CLEAR_DOUBLE_MIN_LINES: int = 2
+const CLEAR_DOUBLE_DELAY: float = 0.08
+const CLEAR_DOUBLE_PITCH: float = 1.25
+const NEW_BEST_DELAY: float = 0.6
+
 const COMBO_PILL_POSITION: Vector2 = Vector2(164, 154.5)
 const COMBO_PILL_SIZE: Vector2 = Vector2(152, 35)
 const COMBO_PILL_RADIUS: float = 17.5
