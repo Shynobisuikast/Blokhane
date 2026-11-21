@@ -61,6 +61,9 @@ func restart() -> void:
 	_session.restart()
 	_clear_drag_state()
 
+func reset_best() -> void:
+	_session.reset_best()
+
 func combo_streak() -> int:
 	return int(_session.score_model.streak)
 
@@ -158,6 +161,7 @@ func _drop_piece(pointer: Vector2) -> void:
 		cleared_cells = _clear_flow.capture_and_clear(_board_model, lines)
 
 	var score_result: Dictionary = _session.score_model.register_turn(placed_cell_count, line_count)
+	_session.record_turn()
 
 	var gain: int = score_result["gain"]
 	var multiplier: float = score_result["multiplier"]

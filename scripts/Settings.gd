@@ -3,8 +3,7 @@ class_name Settings
 extends Control
 
 signal menu_requested
-
-const SaveDataScript = preload("res://scripts/SaveData.gd")
+signal best_reset_requested
 
 # Onay ve tamamlanma mesajı süreleri Config'te tutulur.
 enum ResetPhase { IDLE, CONFIRM, DONE }
@@ -79,7 +78,7 @@ func _build_buttons() -> void:
 	)
 	_sfx_button.pressed.connect(_on_sfx_pressed)
 	_reset_button = _make_button(
-		"Verileri sıfırla",
+		"Rekoru sıfırla",
 		Config.SETTINGS_RESET_POSITION,
 		Config.SETTINGS_RESET_SIZE,
 		Config.SETTINGS_RESET_FONT_SIZE
@@ -178,21 +177,21 @@ func _on_reset_pressed() -> void:
 			_reset_timer.start(Config.SETTINGS_RESET_CONFIRM_SECONDS)
 		ResetPhase.CONFIRM:
 			_reset_timer.stop()
-			SaveDataScript.reset_best()
+			best_reset_requested.emit()
 			_reset_phase = ResetPhase.DONE
 			_reset_button.text = "Sıfırlandı"
 			_reset_timer.start(Config.SETTINGS_RESET_DONE_SECONDS)
 
 func _on_reset_timer_timeout() -> void:
 	_reset_phase = ResetPhase.IDLE
-	_reset_button.text = "Verileri sıfırla"
+	_reset_button.text = "Rekoru sıfırla"
 
 func cancel_pending_confirmation() -> void:
 	if _reset_timer != null:
 		_reset_timer.stop()
 	_reset_phase = ResetPhase.IDLE
 	if _reset_button != null:
-		_reset_button.text = "Verileri sıfırla"
+		_reset_button.text = "Rekoru sıfırla"
 
 func _on_back_pressed() -> void:
 	cancel_pending_confirmation()

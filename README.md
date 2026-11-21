@@ -20,7 +20,7 @@ Blokhane, 8x8 tahtada parçaları sürükleyip bırakarak satır ve sütun temiz
 
 - Açık ve koyu tema.
 - Kalıcı en yüksek skor.
-- Tema, ses ve kayıt sıfırlama ayarları.
+- Tema, ses ve rekor sıfırlama ayarları.
 - Ses efektleri ve arka plan müziği; bilinen müzik sorunu aşağıda belirtilmiştir.
 
 ## Gereksinimler

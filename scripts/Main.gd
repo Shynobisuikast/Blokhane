@@ -34,6 +34,7 @@ func _ready() -> void:
 	menu.play_requested.connect(_on_play_requested)
 	menu.settings_requested.connect(_on_settings_requested)
 	settings.menu_requested.connect(_on_settings_menu_requested)
+	settings.best_reset_requested.connect(game.reset_best)
 	game.start_game()
 	_show_screen(ScreenFlow.Screen.MENU)
 

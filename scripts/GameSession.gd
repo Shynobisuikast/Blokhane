@@ -4,7 +4,7 @@ extends RefCounted
 
 const ScoreModelScript = preload("res://scripts/ScoreModel.gd")
 const GameRulesScript = preload("res://scripts/GameRules.gd")
-const SaveDataScript = preload("res://scripts/SaveData.gd")
+
 
 var score_model: Variant = ScoreModelScript.new()
 var _board_model: BoardModel
@@ -15,7 +15,7 @@ var _hud: Control
 var _game_over_screen: Control
 var _piece_generator: PieceGenerator
 var _rng: RandomNumberGenerator
-var _record_before_run: int = 0
+var _best_store: BestScoreStore = BestScoreStore.new()
 
 func configure(
 	board_model: BoardModel,
@@ -37,12 +37,13 @@ func configure(
 	_rng = rng
 
 func start() -> void:
-	score_model.best = SaveDataScript.load_best()
-	_record_before_run = score_model.best
+	_best_store.load_from_disk()
+	score_model.best = _best_store.best
 	restart()
 
 func restart() -> void:
-	_record_before_run = score_model.best
+	_best_store.begin_run()
+	score_model.best = _best_store.best
 	_board_model.reset()
 	_tray.set_pieces([])
 	_board_view.clear_preview()
@@ -53,6 +54,13 @@ func restart() -> void:
 	_hud.call("reset_score", score_model.score, score_model.best, score_model.streak)
 	_game_over_screen.hide()
 	_tray.set_pieces(_piece_generator.generate_triplet(_board_model, _rng))
+
+func record_turn() -> void:
+	_best_store.submit(score_model.score)
+
+func reset_best() -> void:
+	_best_store.reset()
+	score_model.best = 0
 
 func refill_if_empty() -> bool:
 	for piece: Variant in _tray.pieces:
@@ -70,11 +78,7 @@ func check_game_over() -> Dictionary:
 	if not GameRulesScript.is_game_over(_board_model, remaining_shapes):
 		return {}
 
-	var is_new_best: bool = score_model.score > _record_before_run
-	if is_new_best:
-		score_model.best = score_model.score
-		_record_before_run = score_model.score
-		SaveDataScript.save_best(score_model.best)
+	var is_new_best: bool = _best_store.is_new_best(score_model.score)
 	_hud.call("update_score", score_model.score, score_model.best, score_model.streak, 1.0, 0)
 	_game_over_screen.call("show_result", score_model.score, is_new_best)
 	return {"is_new_best": is_new_best, "final_score": score_model.score}
