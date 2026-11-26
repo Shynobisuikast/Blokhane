@@ -32,19 +32,7 @@ static func color_for(id: int) -> Color:
 	var theme_manager: Node = manager()
 	if theme_manager != null:
 		return theme_manager.call("color_for", id)
-	var palette_key: String = "CELL_EMPTY"
-	match id:
-		1:
-			palette_key = "BLUE"
-		2:
-			palette_key = "TEAL"
-		3:
-			palette_key = "YELLOW"
-		4:
-			palette_key = "RED"
-		5:
-			palette_key = "GREEN"
-	return color(palette_key)
+	return color(ThemePalettesScript.key_for_color_id(id))
 
 static func set_theme(id: ThemePalettesScript.ThemeId) -> void:
 	var theme_manager: Node = manager()

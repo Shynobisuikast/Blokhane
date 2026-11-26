@@ -11,7 +11,11 @@ static func run(test_runner: Variant) -> void:
 	var catalog: Array[Dictionary] = PiecesScript.all()
 	test_runner.check("18 parça kataloğu", catalog.size() >= 15 and catalog.size() <= 20)
 	var catalog_state: Dictionary = _catalog_state(board, catalog)
-	test_runner.check("Şekiller normalize ve hücreleri benzersiz", catalog_state["normalized"])
+	test_runner.check("Şekillerin en küçük x ve y koordinatları sıfır", catalog_state["normalized"])
+	test_runner.check("Şekillerde yinelenen hücre yok", catalog_state["unique_cells"])
+	test_runner.check("Her şekil dört yönlü bağlantılı", catalog_state["connected"])
+	test_runner.check("Parça id'leri benzersiz", catalog_state["unique_ids"])
+	test_runner.check("Parça renk kimlikleri 1-5 aralığında", catalog_state["valid_colors"])
 	test_runner.check("Her şekil boş tahtaya sığar", catalog_state["fits"])
 
 	var generator: Variant = PieceGeneratorScript.new()
@@ -39,22 +43,63 @@ static func run(test_runner: Variant) -> void:
 
 static func _catalog_state(board: Variant, catalog: Array[Dictionary]) -> Dictionary:
 	var normalized: bool = true
+	var unique_cells: bool = true
+	var connected: bool = true
+	var unique_ids: bool = true
+	var valid_colors: bool = true
 	var fits: bool = true
+	var ids_seen: Array[String] = []
 	board.reset()
 	for piece: Dictionary in catalog:
 		var shape: Array[Vector2i] = piece["shape"]
-		var min_x: int = shape[0].x if not shape.is_empty() else 0
-		var min_y: int = shape[0].y if not shape.is_empty() else 0
-		var cells_seen: Array[Vector2i] = []
-		for cell: Vector2i in shape:
-			min_x = mini(min_x, cell.x)
-			min_y = mini(min_y, cell.y)
-			if cells_seen.has(cell):
-				normalized = false
-			cells_seen.append(cell)
-		normalized = normalized and min_x == 0 and min_y == 0 and not shape.is_empty()
-		fits = fits and board.can_fit_anywhere(shape)
-	return {"normalized": normalized, "fits": fits}
+		if shape.is_empty():
+			normalized = false
+			unique_cells = false
+			connected = false
+			fits = false
+		else:
+			var min_x: int = shape[0].x
+			var min_y: int = shape[0].y
+			var cells_seen: Array[Vector2i] = []
+			for cell: Vector2i in shape:
+				min_x = mini(min_x, cell.x)
+				min_y = mini(min_y, cell.y)
+				if cells_seen.has(cell):
+					unique_cells = false
+				cells_seen.append(cell)
+			normalized = normalized and min_x == 0 and min_y == 0
+			connected = connected and _is_connected(shape)
+			fits = fits and board.can_fit_anywhere(shape)
+
+		var piece_id: String = piece["id"]
+		if ids_seen.has(piece_id):
+			unique_ids = false
+		ids_seen.append(piece_id)
+		var color_id: int = piece["color_id"]
+		valid_colors = valid_colors and color_id >= 1 and color_id <= 5
+
+	return {
+		"normalized": normalized,
+		"unique_cells": unique_cells,
+		"connected": connected,
+		"unique_ids": unique_ids,
+		"valid_colors": valid_colors,
+		"fits": fits
+	}
+
+static func _is_connected(shape: Array[Vector2i]) -> bool:
+	if shape.is_empty():
+		return false
+	var visited: Array[Vector2i] = [shape[0]]
+	var directions: Array[Vector2i] = [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]
+	var index: int = 0
+	while index < visited.size():
+		for direction: Vector2i in directions:
+			var neighbor: Vector2i = visited[index] + direction
+			if shape.has(neighbor) and not visited.has(neighbor):
+				visited.append(neighbor)
+		index += 1
+	return visited.size() == shape.size()
 
 static func _fairness_holds(board: Variant, generator: Variant, rng: RandomNumberGenerator) -> bool:
 	for _iteration: int in range(200):

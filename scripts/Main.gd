@@ -34,6 +34,7 @@ func _ready() -> void:
 	menu.play_requested.connect(_on_play_requested)
 	menu.settings_requested.connect(_on_settings_requested)
 	settings.menu_requested.connect(_on_settings_menu_requested)
+	settings.best_reset_requested.connect(game.reset_best)
 	game.start_game()
 	_show_screen(ScreenFlow.Screen.MENU)
 
@@ -75,6 +76,7 @@ func _on_menu_requested() -> void:
 		get_tree().paused = false
 	if not _flow.go(ScreenFlow.Screen.MENU):
 		return
+	game.abandon_run()
 	_show_screen(ScreenFlow.Screen.MENU)
 
 func _on_restart_requested() -> void:
@@ -98,11 +100,6 @@ func _on_game_over(_final_score: int, is_new_best: bool) -> void:
 		_show_screen(ScreenFlow.Screen.GAME_OVER)
 
 func _show_screen(screen: ScreenFlow.Screen) -> void:
-	Audio.set_menu_context(
-		screen == ScreenFlow.Screen.MENU or screen == ScreenFlow.Screen.SETTINGS
-	)
-	Audio.set_paused(screen == ScreenFlow.Screen.PAUSED)
-	Audio.set_game_over(screen == ScreenFlow.Screen.GAME_OVER)
 	if screen != ScreenFlow.Screen.SETTINGS:
 		settings.cancel_pending_confirmation()
 	var gameplay_visible: bool = (

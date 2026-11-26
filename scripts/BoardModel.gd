@@ -82,7 +82,9 @@ func can_fit_anywhere(shape: Array[Vector2i]) -> bool:
 	return false
 
 func preview_complete_lines(shape: Array[Vector2i], origin: Vector2i) -> Dictionary:
-	var empty_result: Dictionary = {"rows": [], "cols": []}
+	var empty_rows: Array[int] = []
+	var empty_columns: Array[int] = []
+	var empty_result: Dictionary = {"rows": empty_rows, "cols": empty_columns}
 	if not can_place(shape, origin):
 		return empty_result
 

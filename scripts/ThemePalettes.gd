@@ -33,6 +33,21 @@ const _LIGHT: Dictionary = {
 	"ON_ACCENT": Color("#FFFFFF")
 }
 
+static func key_for_color_id(id: int) -> String:
+	match id:
+		1:
+			return "BLUE"
+		2:
+			return "TEAL"
+		3:
+			return "YELLOW"
+		4:
+			return "RED"
+		5:
+			return "GREEN"
+		_:
+			return "CELL_EMPTY"
+
 static func get_palette(id: ThemeId) -> Dictionary:
 	if id == ThemeId.LIGHT:
 		return _LIGHT.duplicate()

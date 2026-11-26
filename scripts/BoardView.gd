@@ -2,6 +2,8 @@
 class_name BoardView
 extends Control
 
+signal clear_finished
+
 const CellDrawingScript = preload("res://scripts/CellDrawing.gd")
 const ClearStaggerScript = preload("res://scripts/ClearStagger.gd")
 
@@ -113,8 +115,8 @@ func play_clear(
 	_animation_elapsed = 0.0
 	queue_redraw()
 	var total_duration: float = duration + ClearStaggerScript.maximum_delay(_clear_delays)
-	var tween: Tween = _start_visual_animation(total_duration)
-	await tween.finished
+	_start_visual_animation(total_duration)
+	await clear_finished
 
 func _start_visual_animation(duration: float) -> Tween:
 	_animation_tween = create_tween()
@@ -132,6 +134,7 @@ func _cancel_visual_animation() -> void:
 	_animation_elapsed = 0.0
 	_place_progress = 1.0
 	queue_redraw()
+	clear_finished.emit()
 
 func _set_animation_elapsed(elapsed: float) -> void:
 	_animation_elapsed = elapsed
@@ -147,6 +150,7 @@ func _finish_visual_animation() -> void:
 	_animation_elapsed = 0.0
 	_place_progress = 1.0
 	queue_redraw()
+	clear_finished.emit()
 
 func _clear_progress_for_cell(cell: Vector2i) -> float:
 	var delay: float = float(_clear_delays.get(cell, 0.0))

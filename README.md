@@ -20,8 +20,8 @@ Blokhane, 8x8 tahtada parçaları sürükleyip bırakarak satır ve sütun temiz
 
 - Açık ve koyu tema.
 - Kalıcı en yüksek skor.
-- Tema, ses ve kayıt sıfırlama ayarları.
-- Ses efektleri ve arka plan müziği; bilinen müzik sorunu aşağıda belirtilmiştir.
+- Tema, ses ve rekor sıfırlama ayarları.
+- Ses efektleri.
 
 ## Gereksinimler
 
@@ -31,9 +31,10 @@ Blokhane, 8x8 tahtada parçaları sürükleyip bırakarak satır ve sütun temiz
 
 Projeyi Godot 4.7 ile açın ve `scenes/Main.tscn` sahnesini çalıştırın.
 
-Smoke testlerini çalıştırmak için proje kökünde:
+İçe aktarma ve smoke testlerini proje kökünde çalıştırın:
 
 ```sh
+godot --headless --editor --path . --quit
 godot --headless --path . --script res://tests/smoke_test.gd
 ```
 
@@ -59,8 +60,8 @@ chmod +x build/Blokhane-x86_64.AppImage
 .
 ├── scenes/       Godot sahneleri
 ├── scripts/      Oyun ve arayüz betikleri
-├── sounds/       Ses efektleri ve müzik
-├── templates/    Tasarım SVG dosyaları
+├── sounds/       Ses efektleri
+├── templates/    Tasarım SVG dosyaları (yerel, depoya dahil değil)
 ├── assets/       Dağıtım simgesi
 ├── tests/        Headless smoke testleri
 ├── tools/        Linux AppImage derleme betiği

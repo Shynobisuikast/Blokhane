@@ -15,19 +15,7 @@ func color(key: String) -> Color:
 	return palette[key] as Color
 
 func color_for(id: int) -> Color:
-	var palette_key: String = "CELL_EMPTY"
-	match id:
-		1:
-			palette_key = "BLUE"
-		2:
-			palette_key = "TEAL"
-		3:
-			palette_key = "YELLOW"
-		4:
-			palette_key = "RED"
-		5:
-			palette_key = "GREEN"
-	return color(palette_key)
+	return color(ThemePalettes.key_for_color_id(id))
 
 func set_theme(id: ThemePalettes.ThemeId) -> void:
 	if id != ThemePalettes.ThemeId.DARK and id != ThemePalettes.ThemeId.LIGHT:

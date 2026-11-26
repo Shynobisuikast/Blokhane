@@ -3,15 +3,13 @@ class_name Settings
 extends Control
 
 signal menu_requested
-
-const SaveDataScript = preload("res://scripts/SaveData.gd")
+signal best_reset_requested
 
 # Onay ve tamamlanma mesajı süreleri Config'te tutulur.
 enum ResetPhase { IDLE, CONFIRM, DONE }
 
 var _dark_button: Button
 var _light_button: Button
-var _music_button: Button
 var _sfx_button: Button
 var _reset_button: Button
 var _back_button: Button
@@ -64,13 +62,6 @@ func _build_buttons() -> void:
 		Config.SETTINGS_THEME_OPTION_FONT_SIZE
 	)
 	_light_button.pressed.connect(_on_light_pressed)
-	_music_button = _make_button(
-		"Müzik: Açık",
-		Config.SETTINGS_MUSIC_POSITION,
-		Config.SETTINGS_AUDIO_BUTTON_SIZE,
-		Config.SETTINGS_AUDIO_BUTTON_FONT_SIZE
-	)
-	_music_button.pressed.connect(_on_music_pressed)
 	_sfx_button = _make_button(
 		"Efektler: Açık",
 		Config.SETTINGS_SFX_POSITION,
@@ -79,7 +70,7 @@ func _build_buttons() -> void:
 	)
 	_sfx_button.pressed.connect(_on_sfx_pressed)
 	_reset_button = _make_button(
-		"Verileri sıfırla",
+		"Rekoru sıfırla",
 		Config.SETTINGS_RESET_POSITION,
 		Config.SETTINGS_RESET_SIZE,
 		Config.SETTINGS_RESET_FONT_SIZE
@@ -126,13 +117,8 @@ func _apply_theme() -> void:
 		selected_id == ThemePalettes.ThemeId.LIGHT,
 		Config.SETTINGS_THEME_OPTION_RADIUS
 	)
-	var music_enabled: bool = Audio.is_music_enabled()
 	var sfx_enabled: bool = Audio.is_sfx_enabled()
-	_music_button.text = "Müzik: Açık" if music_enabled else "Müzik: Kapalı"
 	_sfx_button.text = "Efektler: Açık" if sfx_enabled else "Efektler: Kapalı"
-	_set_button_theme(
-		_music_button, music_enabled, Config.SETTINGS_AUDIO_BUTTON_RADIUS
-	)
 	_set_button_theme(
 		_sfx_button, sfx_enabled, Config.SETTINGS_AUDIO_BUTTON_RADIUS
 	)
@@ -156,9 +142,6 @@ func _set_button_theme(button: Button, selected: bool, radius: int) -> void:
 	button.add_theme_stylebox_override("pressed", style)
 	button.add_theme_stylebox_override("focus", style)
 
-func _on_music_pressed() -> void:
-	Audio.set_music_enabled(not Audio.is_music_enabled())
-	_apply_theme()
 
 func _on_sfx_pressed() -> void:
 	Audio.set_sfx_enabled(not Audio.is_sfx_enabled())
@@ -178,21 +161,21 @@ func _on_reset_pressed() -> void:
 			_reset_timer.start(Config.SETTINGS_RESET_CONFIRM_SECONDS)
 		ResetPhase.CONFIRM:
 			_reset_timer.stop()
-			SaveDataScript.reset_best()
+			best_reset_requested.emit()
 			_reset_phase = ResetPhase.DONE
 			_reset_button.text = "Sıfırlandı"
 			_reset_timer.start(Config.SETTINGS_RESET_DONE_SECONDS)
 
 func _on_reset_timer_timeout() -> void:
 	_reset_phase = ResetPhase.IDLE
-	_reset_button.text = "Verileri sıfırla"
+	_reset_button.text = "Rekoru sıfırla"
 
 func cancel_pending_confirmation() -> void:
 	if _reset_timer != null:
 		_reset_timer.stop()
 	_reset_phase = ResetPhase.IDLE
 	if _reset_button != null:
-		_reset_button.text = "Verileri sıfırla"
+		_reset_button.text = "Rekoru sıfırla"
 
 func _on_back_pressed() -> void:
 	cancel_pending_confirmation()
