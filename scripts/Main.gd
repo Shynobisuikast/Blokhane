@@ -76,6 +76,7 @@ func _on_menu_requested() -> void:
 		get_tree().paused = false
 	if not _flow.go(ScreenFlow.Screen.MENU):
 		return
+	game.abandon_run()
 	_show_screen(ScreenFlow.Screen.MENU)
 
 func _on_restart_requested() -> void:

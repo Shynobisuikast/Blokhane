@@ -30,6 +30,7 @@ var _has_preview_origin: bool = false
 var _touch_contact_active: bool = false
 var _drag_started_touch: bool = false
 var _return_tween: Tween
+var _run_id: int = 0
 
 func _ready() -> void:
 	Input.emulate_mouse_from_touch = true
@@ -58,7 +59,13 @@ func start_game() -> void:
 	_session.start()
 
 func restart() -> void:
+	_run_id += 1
 	_session.restart()
+	_clear_drag_state()
+
+func abandon_run() -> void:
+	_run_id += 1
+	cancel_drag()
 	_clear_drag_state()
 
 func reset_best() -> void:
@@ -139,6 +146,7 @@ func _move_drag(pointer: Vector2) -> void:
 	_board_view.set_preview(preview_cells, color_id, rows, columns)
 
 func _drop_piece(pointer: Vector2) -> void:
+	var run_id: int = _run_id
 	_move_drag(pointer)
 	var board_top_left: Vector2 = _convert_position(_drag_layer, _board_view, _drag_layer.top_left)
 	var shape: Array[Vector2i] = _dragged_piece["shape"]
@@ -183,6 +191,8 @@ func _drop_piece(pointer: Vector2) -> void:
 	if line_count > 0:
 		lines_cleared.emit(line_count, gain, multiplier)
 		await _board_view.play_clear(cleared_cells, Config.CLEAR_TWEEN_TIME, placed_cells)
+		if run_id != _run_id:
+			return
 		_drag_state = DragState.IDLE
 	if _session.refill_if_empty():
 		triplet_refilled.emit()
