@@ -15,6 +15,15 @@ static func run(test_runner: Variant) -> void:
 	for key: String in light:
 		palettes_valid = palettes_valid and typeof(light[key]) == TYPE_COLOR
 	test_runner.check("60 palet anahtarları eşit, bütün değerler Color", palettes_valid)
+	test_runner.check(
+		"Renk kimlikleri tek palet eşlemesinde çözülür",
+		ThemePalettesScript.key_for_color_id(1) == "BLUE"
+		and ThemePalettesScript.key_for_color_id(2) == "TEAL"
+		and ThemePalettesScript.key_for_color_id(3) == "YELLOW"
+		and ThemePalettesScript.key_for_color_id(4) == "RED"
+		and ThemePalettesScript.key_for_color_id(5) == "GREEN"
+		and ThemePalettesScript.key_for_color_id(99) == "CELL_EMPTY"
+	)
 
 	test_runner.check(
 		"61 koyu temada TEXT-BG parlaklık farkı 0.4'ten büyük",
