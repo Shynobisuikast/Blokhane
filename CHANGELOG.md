@@ -2,6 +2,12 @@
 
 ## Yayımlanmamış
 
+- Temizleme animasyonu iptal edilince bekleyen coroutine tamamlanır; Menüye dönülen oyun oyun sonu akışını çalıştırmaz.
+- Geçersiz çizgi önizlemeleri tipli boş satır ve sütun dizileri döndürür.
+- Parça renk kimliklerinin tema anahtarı eşlemesi tek yerde toplandı.
+- Parça kataloğu şekil, bağlantı, kimlik, renk ve tahta sınırı değişmezleriyle sınanır.
+- GL Compatibility renderer ve 360×645 pencere override'ı ayarlandı.
+- README içe aktarma komutunu ve depoda bulunmayan yerel `templates/` notunu içerir.
 - Müzik sistemi, müzik dosyaları hazır olana kadar koddan kaldırıldı; ayarlardaki müzik düğmesi kaldırıldı.
 
 ## v1.0.0
