@@ -57,6 +57,12 @@ static func run(test_runner: Variant) -> void:
 		"35 tahta dışı geçersiz yerleşim boş sonuç döndürür",
 		outside_preview["rows"] == [] and outside_preview["cols"] == []
 	)
+	var typed_empty_result: Dictionary = board.preview_complete_lines(
+		single_cell,
+		Vector2i(-5, -5)
+	)
+	var typed_rows: Array[int] = typed_empty_result["rows"]
+	test_runner.check("77 geçersiz önizleme tipli boş satır dizisi döndürür", typed_rows.is_empty())
 
 	test_runner.check("36 sabit seed ile 50 rastgele sonuç place/find_full_lines ile eşleşir", _random_results_match())
 
