@@ -21,7 +21,7 @@ Blokhane, 8x8 tahtada parçaları sürükleyip bırakarak satır ve sütun temiz
 - Açık ve koyu tema.
 - Kalıcı en yüksek skor.
 - Tema, ses ve rekor sıfırlama ayarları.
-- Ses efektleri ve arka plan müziği; bilinen müzik sorunu aşağıda belirtilmiştir.
+- Ses efektleri.
 
 ## Gereksinimler
 
@@ -59,7 +59,7 @@ chmod +x build/Blokhane-x86_64.AppImage
 .
 ├── scenes/       Godot sahneleri
 ├── scripts/      Oyun ve arayüz betikleri
-├── sounds/       Ses efektleri ve müzik
+├── sounds/       Ses efektleri
 ├── templates/    Tasarım SVG dosyaları
 ├── assets/       Dağıtım simgesi
 ├── tests/        Headless smoke testleri

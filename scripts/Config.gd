@@ -77,12 +77,11 @@ const SETTINGS_LIGHT_POSITION: Vector2 = Vector2(245, 278)
 const SETTINGS_THEME_OPTION_SIZE: Vector2 = Vector2(165, 60)
 const SETTINGS_THEME_OPTION_RADIUS: int = 18
 const SETTINGS_THEME_OPTION_FONT_SIZE: int = 20
-const SETTINGS_MUSIC_POSITION: Vector2 = Vector2(70, 370)
-const SETTINGS_SFX_POSITION: Vector2 = Vector2(70, 452)
+const SETTINGS_SFX_POSITION: Vector2 = Vector2(70, 370)
 const SETTINGS_AUDIO_BUTTON_SIZE: Vector2 = Vector2(340, 60)
 const SETTINGS_AUDIO_BUTTON_RADIUS: int = 18
 const SETTINGS_AUDIO_BUTTON_FONT_SIZE: int = 18
-const SETTINGS_RESET_POSITION: Vector2 = Vector2(70, 534)
+const SETTINGS_RESET_POSITION: Vector2 = Vector2(70, 452)
 const SETTINGS_RESET_SIZE: Vector2 = Vector2(340, 60)
 const SETTINGS_RESET_RADIUS: int = 18
 const SETTINGS_RESET_FONT_SIZE: int = 20
@@ -116,7 +115,6 @@ const COMBO_FONT_SIZE: int = 18
 const SOUND_DIR: String = "res://sounds/"
 
 enum SoundId { PICK, PLACE, INVALID, CLEAR, TRAY_REFILL, NEW_BEST, GAME_OVER, BUTTON }
-enum MusicTrack { MAIN, MENU }
 
 const SOUND_PATHS: Dictionary = {
 	SoundId.PICK: SOUND_DIR + "sfx_pick.wav",
@@ -128,19 +126,8 @@ const SOUND_PATHS: Dictionary = {
 	SoundId.GAME_OVER: SOUND_DIR + "sfx_game_over.wav",
 	SoundId.BUTTON: SOUND_DIR + "sfx_button.wav"
 }
-const MUSIC_PATHS: Dictionary = {
-	MusicTrack.MAIN: SOUND_DIR + "music_main.wav",
-	MusicTrack.MENU: SOUND_DIR + "music_menu.wav"
-}
-const MUSIC_DB: float = -10.0
 const SFX_DB: float = -4.0
-const MUSIC_PAUSE_DB: float = -12.0
 const SFX_PLAYER_COUNT: int = 6
-const MUSIC_CROSSFADE_SECONDS: float = 0.5
-const MUSIC_CROSSFADE_HALF_SECONDS: float = MUSIC_CROSSFADE_SECONDS / 2.0
-const MUSIC_SILENCE_DB: float = -80.0
-const MUSIC_UNITY_DB: float = 0.0
-const MUSIC_BUS_NAME: StringName = &"Music"
 const SFX_BUS_NAME: StringName = &"SFX"
 const CLEAR_DOUBLE_MIN_LINES: int = 2
 const CLEAR_DOUBLE_DELAY: float = 0.08

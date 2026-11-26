@@ -5,7 +5,7 @@
 [ext_resource type="Script" uid="uid://dgdffb2jnt5sy" path="res://scripts/Tray.gd" id="3_tray"]
 [ext_resource type="Script" uid="uid://dgsw7p4w5ikef" path="res://scripts/Game.gd" id="4_game"]
 [ext_resource type="Script" uid="uid://da7me5b5istum" path="res://scripts/DragLayer.gd" id="5_drag_layer"]
-[ext_resource type="Script" path="res://scripts/Hud.gd" id="6_hud"]
+[ext_resource type="Script" uid="uid://dks22bfw7qm8r" path="res://scripts/Hud.gd" id="6_hud"]
 [ext_resource type="PackedScene" path="res://scenes/GameOver.tscn" id="7_game_over"]
 [ext_resource type="PackedScene" path="res://scenes/Pause.tscn" id="8_pause"]
 [ext_resource type="PackedScene" path="res://scenes/Menu.tscn" id="9_menu"]
@@ -56,7 +56,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("4_game")
 
-[node name="Hud" type="Control" parent="."]
+[node name="Hud" type="Control" parent="." unique_id=226204496]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -66,22 +66,24 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("6_hud")
 
-[node name="DragLayer" type="Control" parent="."]
+[node name="DragLayer" type="Control" parent="." unique_id=109126959]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-offset_right = 0.0
-offset_bottom = 0.0
 mouse_filter = 2
 script = ExtResource("5_drag_layer")
 
-[node name="GameOver" parent="." instance=ExtResource("7_game_over")]
+[node name="GameOver" parent="." unique_id=342310356 instance=ExtResource("7_game_over")]
+layout_mode = 1
 
-[node name="Pause" parent="." instance=ExtResource("8_pause")]
+[node name="Pause" parent="." unique_id=171046175 instance=ExtResource("8_pause")]
+layout_mode = 1
 
-[node name="Menu" parent="." instance=ExtResource("9_menu")]
+[node name="Menu" parent="." unique_id=2019096797 instance=ExtResource("9_menu")]
+layout_mode = 1
 
-[node name="Settings" parent="." instance=ExtResource("10_settings")]
+[node name="Settings" parent="." unique_id=1793850241 instance=ExtResource("10_settings")]
+layout_mode = 1

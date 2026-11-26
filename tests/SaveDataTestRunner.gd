@@ -62,6 +62,28 @@ static func run(test_runner: Variant) -> void:
 		partial_file_written and best_ignores_partial_tmp == 7
 	)
 
+	_remove_test_files()
+	var legacy_music_file: FileAccess = FileAccess.open(TEST_SAVE_PATH, FileAccess.WRITE)
+	var legacy_music_written: bool = legacy_music_file != null
+	if legacy_music_file != null:
+		legacy_music_file.store_string(
+			"[audio]\nmusic_enabled=false\nsfx_enabled=true\n"
+		)
+		legacy_music_file.close()
+	SaveDataScript.save_audio_preferences(false, TEST_SAVE_PATH)
+	var updated_config: ConfigFile = ConfigFile.new()
+	var updated_config_loaded: bool = updated_config.load(TEST_SAVE_PATH) == OK
+	var legacy_music_preserved: bool = (
+		updated_config_loaded
+		and updated_config.get_value("audio", "music_enabled", true) == false
+		and updated_config.get_value("audio", "sfx_enabled", true) == false
+	)
+	_remove_test_files()
+	test_runner.check(
+		"96 sfx tercihi kaydı dosyadaki music_enabled anahtarını korur",
+		legacy_music_written and legacy_music_preserved
+	)
+
 static func _remove_test_files() -> void:
 	_remove_file(TEST_SAVE_PATH)
 	_remove_file(TEST_TMP_PATH)

@@ -1,5 +1,9 @@
 # Değişiklik günlüğü
 
+## Yayımlanmamış
+
+- Müzik sistemi, müzik dosyaları hazır olana kadar koddan kaldırıldı; ayarlardaki müzik düğmesi kaldırıldı.
+
 ## v1.0.0
 
 - Godot 4 projesi ve 8x8 tahta modeli/görünümü oluşturuldu.

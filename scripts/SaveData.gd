@@ -8,7 +8,6 @@ const BEST_KEY: String = "best"
 const THEME_SECTION: String = "settings"
 const THEME_KEY: String = "theme"
 const AUDIO_SECTION: String = "audio"
-const MUSIC_ENABLED_KEY: String = "music_enabled"
 const SFX_ENABLED_KEY: String = "sfx_enabled"
 
 static func load_best(path: String = SAVE_PATH) -> int:
@@ -52,26 +51,19 @@ static func save_theme(id: ThemePalettes.ThemeId, path: String = SAVE_PATH) -> v
 	_save_config(config, path)
 
 static func load_audio_preferences(path: String = SAVE_PATH) -> Dictionary:
-	var preferences: Dictionary = {"music_enabled": true, "sfx_enabled": true}
+	var preferences: Dictionary = {"sfx_enabled": true}
 	var config: ConfigFile = ConfigFile.new()
 	if not _load_config(config, path):
 		return preferences
-	var music_enabled: Variant = config.get_value(AUDIO_SECTION, MUSIC_ENABLED_KEY, true)
 	var sfx_enabled: Variant = config.get_value(AUDIO_SECTION, SFX_ENABLED_KEY, true)
-	if typeof(music_enabled) == TYPE_BOOL:
-		preferences["music_enabled"] = music_enabled
 	if typeof(sfx_enabled) == TYPE_BOOL:
 		preferences["sfx_enabled"] = sfx_enabled
 	return preferences
 
-static func save_audio_preferences(
-	music_enabled: bool,
-	sfx_enabled: bool,
-	path: String = SAVE_PATH
-) -> void:
+# music_enabled anahtarı geri dönüş uyumluluğu için dosyada korunur; bkz. tests/SaveDataTestRunner.gd 96.
+static func save_audio_preferences(sfx_enabled: bool, path: String = SAVE_PATH) -> void:
 	var config: ConfigFile = ConfigFile.new()
 	_load_config(config, path)
-	config.set_value(AUDIO_SECTION, MUSIC_ENABLED_KEY, music_enabled)
 	config.set_value(AUDIO_SECTION, SFX_ENABLED_KEY, sfx_enabled)
 	_save_config(config, path)
 
